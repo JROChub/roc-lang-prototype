@@ -1,0 +1,91 @@
+import unittest
+
+from roc import ast
+from roc.lexer import tokenize
+from roc.parser import Parser, ParseError
+
+
+def parse_program(source: str) -> ast.Program:
+  tokens = tokenize(source)
+  parser = Parser(tokens)
+  return parser.parse_program()
+
+
+class ParserTests(unittest.TestCase):
+  def test_bool_literal(self):
+    program = parse_program("fn main() { return true; }")
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt, ast.ReturnStmt)
+    self.assertIsInstance(stmt.expr, ast.BoolLiteral)
+
+  def test_unary_minus(self):
+    program = parse_program("fn main() { return -(1 + 2); }")
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt.expr, ast.UnaryOp)
+
+  def test_unary_not(self):
+    program = parse_program("fn main() { return !true; }")
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt.expr, ast.UnaryOp)
+    self.assertEqual(stmt.expr.op, '!')
+
+  def test_set_statement(self):
+    program = parse_program("fn main() { let x = 1; set x = 2; }")
+    stmt = program.functions[0].body.statements[1]
+    self.assertIsInstance(stmt, ast.SetStmt)
+
+  def test_for_statement(self):
+    program = parse_program("fn main() { for i in 0..3 { print(i); } }")
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt, ast.ForStmt)
+    self.assertEqual(stmt.var_name, 'i')
+    self.assertFalse(stmt.inclusive)
+
+  def test_for_statement_inclusive(self):
+    program = parse_program("fn main() { for i in 0..=3 { print(i); } }")
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt, ast.ForStmt)
+    self.assertTrue(stmt.inclusive)
+
+  def test_for_statement_with_step(self):
+    program = parse_program("fn main() { for i in 0..10 by 2 { print(i); } }")
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt, ast.ForStmt)
+    self.assertIsNotNone(stmt.step)
+
+  def test_type_annotations(self):
+    program = parse_program("fn add(a: Int, b: Int) -> Int { return a + b; }")
+    fn = program.functions[0]
+    self.assertEqual(fn.params[0].type_ann.name, "Int")
+    self.assertEqual(fn.params[1].type_ann.name, "Int")
+    self.assertEqual(fn.return_type.name, "Int")
+
+  def test_let_type_annotation(self):
+    program = parse_program("fn main() { let x: Int = 1; }")
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt, ast.LetStmt)
+    self.assertEqual(stmt.type_ann.name, "Int")
+
+  def test_break_continue(self):
+    program = parse_program("fn main() { break; continue; }")
+    self.assertIsInstance(program.functions[0].body.statements[0], ast.BreakStmt)
+    self.assertIsInstance(program.functions[0].body.statements[1], ast.ContinueStmt)
+
+  def test_else_if(self):
+    source = "fn main() { return if false { 1; } else if true { 2; } else { 3; }; }"
+    program = parse_program(source)
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt.expr, ast.IfExpr)
+    else_block = stmt.expr.else_block
+    self.assertEqual(len(else_block.statements), 1)
+    self.assertIsInstance(else_block.statements[0], ast.ExprStmt)
+    self.assertIsInstance(else_block.statements[0].expr, ast.IfExpr)
+
+  def test_unclosed_block(self):
+    with self.assertRaises(ParseError) as ctx:
+      parse_program("fn main() { let x = 1; ")
+    self.assertIn("Expected RBRACE", str(ctx.exception))
+
+
+if __name__ == '__main__':
+  unittest.main()

@@ -1,0 +1,73 @@
+import unittest
+
+from roc.lexer import tokenize
+from roc.parser import Parser
+from roc.typechecker import TypeError, check_program
+
+
+def parse_program(source: str):
+  tokens = tokenize(source)
+  parser = Parser(tokens)
+  return parser.parse_program()
+
+
+class TypeCheckerTests(unittest.TestCase):
+  def test_valid_program(self):
+    program = parse_program("fn main() { let x = 1; return x + 2; }")
+    check_program(program)
+
+  def test_string_concat_allows_other_types(self):
+    program = parse_program('fn main() { return "x=" + 1; }')
+    check_program(program)
+
+  def test_let_annotation_mismatch_reports_loc(self):
+    program = parse_program("fn main() { let x: Int = true; }")
+    with self.assertRaises(TypeError) as ctx:
+      check_program(program)
+    self.assertIn("1:13", str(ctx.exception))
+
+  def test_unknown_type_annotation(self):
+    program = parse_program("fn main() { let x: Foo = 1; }")
+    with self.assertRaises(TypeError) as ctx:
+      check_program(program)
+    self.assertIn("Unknown type", str(ctx.exception))
+
+  def test_arithmetic_type_error(self):
+    program = parse_program("fn main() { return true + 1; }")
+    with self.assertRaises(TypeError):
+      check_program(program)
+
+  def test_if_condition_type_error(self):
+    program = parse_program("fn main() { return if 1 { 2; } else { 3; }; }")
+    with self.assertRaises(TypeError):
+      check_program(program)
+
+  def test_for_range_type_error(self):
+    program = parse_program("fn main() { for i in true..3 { print(i); } }")
+    with self.assertRaises(TypeError):
+      check_program(program)
+
+  def test_for_step_type_error(self):
+    program = parse_program("fn main() { for i in 0..3 by false { print(i); } }")
+    with self.assertRaises(TypeError):
+      check_program(program)
+
+  def test_break_outside_loop(self):
+    program = parse_program("fn main() { break; }")
+    with self.assertRaises(TypeError):
+      check_program(program)
+
+  def test_return_inside_expression_block(self):
+    source = "fn main() { return if true { return 1; } else { 2; }; }"
+    program = parse_program(source)
+    with self.assertRaises(TypeError):
+      check_program(program)
+
+  def test_function_call_arity(self):
+    program = parse_program("fn add(a, b) { return a + b; } fn main() { return add(1); }")
+    with self.assertRaises(TypeError):
+      check_program(program)
+
+
+if __name__ == '__main__':
+  unittest.main()

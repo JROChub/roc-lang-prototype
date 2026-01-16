@@ -1,0 +1,10 @@
+include README.md
+include LICENSE
+include CHANGELOG.md
+include SPEC.md
+include SPEC_V0.md
+include ROC_CORE.md
+include ROC_VISION.md
+include compiler_architecture.md
+recursive-include examples *.roc
+recursive-include tests *.py

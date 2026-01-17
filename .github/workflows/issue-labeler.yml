@@ -24,6 +24,8 @@ jobs:
               { label: 'area: interpreter', re: /(interpreter|runtime|eval|evaluator)/ },
               { label: 'area: typechecker', re: /(type checker|typechecker|typing|\btypes?\b)/ },
               { label: 'area: cli', re: /(\bcli\b|command line|terminal|shell)/ },
+              { label: 'area: compiler', re: /(compiler|\bir\b|codegen|lowering)/ },
+              { label: 'area: tests', re: /(tests?|testing|ci|continuous integration)/ },
             ];
 
             const labels = new Set();

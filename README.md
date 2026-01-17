@@ -17,6 +17,7 @@ This ZIP includes:
 - `CONTRIBUTING.md` – contribution guide.
 - `CHANGELOG.md` – release notes.
 - `RELEASE.md` – release checklist.
+- `TRIAGE.md` – issue triage guide.
 - `Makefile` – release helper targets.
 - `roc/` – a minimal Roc interpreter implemented in Python for a **small v0 subset**.
 - `examples/` – runnable `.roc` programs.
@@ -105,6 +106,11 @@ python -m roc.cli examples/typed.roc
 ```bash
 python -m unittest discover -s tests
 ```
+
+## Maintainer notes
+
+- Issue triage flow and labels: `TRIAGE.md`
+- Label definitions live in `.github/labels.yml` and sync via the `Label Sync` workflow
 
 ## Type checking only
 

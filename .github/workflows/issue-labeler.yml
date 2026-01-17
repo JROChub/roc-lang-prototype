@@ -1,0 +1,44 @@
+name: Issue Auto Labeler
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply area labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const text = `${issue.title}\n${issue.body || ''}`.toLowerCase();
+            const rules = [
+              { label: 'area: docs', re: /(\bdoc\b|\bdocs\b|documentation|readme|guide|tutorial)/ },
+              { label: 'area: spec', re: /(\bspec\b|specification|grammar)/ },
+              { label: 'area: parser', re: /(parser|parse|parsing|syntax)/ },
+              { label: 'area: interpreter', re: /(interpreter|runtime|eval|evaluator)/ },
+              { label: 'area: typechecker', re: /(type checker|typechecker|typing|\btypes?\b)/ },
+              { label: 'area: cli', re: /(\bcli\b|command line|terminal|shell)/ },
+            ];
+
+            const labels = new Set();
+            for (const rule of rules) {
+              if (rule.re.test(text)) {
+                labels.add(rule.label);
+              }
+            }
+
+            if (labels.size === 0) {
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              ...context.repo,
+              issue_number: issue.number,
+              labels: Array.from(labels),
+            });

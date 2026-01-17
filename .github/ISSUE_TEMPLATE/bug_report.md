@@ -7,6 +7,18 @@ labels: bug
 ## Summary
 Briefly describe the bug.
 
+## Primary area
+Pick one primary area by replacing [ ] with [x]. If unsure, leave blank.
+
+- [ ] area: docs
+- [ ] area: spec
+- [ ] area: parser
+- [ ] area: interpreter
+- [ ] area: typechecker
+- [ ] area: compiler
+- [ ] area: cli
+- [ ] area: tests
+
 ## Reproduction
 Steps to reproduce the behavior:
 1. 

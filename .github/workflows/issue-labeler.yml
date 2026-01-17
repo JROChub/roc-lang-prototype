@@ -16,7 +16,39 @@ jobs:
         with:
           script: |
             const issue = context.payload.issue;
-            const text = `${issue.title}\n${issue.body || ''}`.toLowerCase();
+            const body = issue.body || '';
+            const lines = body.split(/\r?\n/);
+            const areaLabels = new Set([
+              'area: docs',
+              'area: spec',
+              'area: parser',
+              'area: interpreter',
+              'area: typechecker',
+              'area: compiler',
+              'area: cli',
+              'area: tests',
+            ]);
+            const explicitAreas = new Set();
+            for (const line of lines) {
+              const match = line.match(/^\s*-\s*\[[xX]\]\s*area:\s*([a-z]+)\s*$/i);
+              if (!match) {
+                continue;
+              }
+              const label = `area: ${match[1].toLowerCase()}`;
+              if (areaLabels.has(label)) {
+                explicitAreas.add(label);
+              }
+            }
+            const filteredLines = lines.filter((line) => {
+              if (/^\s*-\s*\[[ xX]\]\s*area:\s*/i.test(line)) {
+                return false;
+              }
+              if (/^##\s+Primary area/i.test(line)) {
+                return false;
+              }
+              return true;
+            });
+            const text = `${issue.title}\n${filteredLines.join('\n')}`.toLowerCase();
             const rules = [
               { label: 'area: docs', re: /(\bdoc\b|\bdocs\b|documentation|readme|guide|tutorial)/ },
               { label: 'area: spec', re: /(\bspec\b|specification|grammar)/ },
@@ -28,10 +60,12 @@ jobs:
               { label: 'area: tests', re: /(\btesting\b|\bci\b|continuous integration|coverage|test suite|golden outputs?|snapshot|regression test|unit test|integration test)/ },
             ];
 
-            const labels = new Set();
-            for (const rule of rules) {
-              if (rule.re.test(text)) {
-                labels.add(rule.label);
+            const labels = new Set(explicitAreas);
+            if (labels.size === 0) {
+              for (const rule of rules) {
+                if (rule.re.test(text)) {
+                  labels.add(rule.label);
+                }
               }
             }
 

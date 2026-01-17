@@ -6,6 +6,12 @@ from .parser import Parser, ParseError
 from .interpreter import Interpreter, RuntimeError
 from .typechecker import check_program, TypeError
 
+HELP_TEXT = """Usage: python -m roc.cli [--all-errors] <file.roc>
+
+Options:
+  --all-errors  Show all parse errors instead of the first.
+"""
+
 def run_path(path: str, check_only: bool = False, all_errors: bool = False) -> int:
   try:
     with open(path, 'r', encoding='utf-8') as f:
@@ -60,14 +66,14 @@ def main(argv=None):
   if argv is None:
     argv = sys.argv[1:]
   if not argv:
-    print("Usage: python -m roc.cli [--all-errors] <file.roc>")
+    print(HELP_TEXT.strip())
     return 1
   all_errors = False
   if "--all-errors" in argv:
     all_errors = True
     argv = [arg for arg in argv if arg != "--all-errors"]
   if argv[0] in ("--help", "-h", "help"):
-    print("Usage: python -m roc.cli [--all-errors] <file.roc>")
+    print(HELP_TEXT.strip())
     return 0
   return run_path(argv[0], check_only=False, all_errors=all_errors)
 

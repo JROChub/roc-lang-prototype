@@ -14,6 +14,9 @@ HELP_TEXT = """Usage:
   roc check --all-errors <file.roc>
   roc --version
   roc --help
+
+Options:
+  --all-errors  Show all parse errors instead of the first.
 """
 
 def main(argv=None):

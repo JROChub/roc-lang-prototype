@@ -162,6 +162,17 @@ Usage:
   roc check --all-errors <file.roc>
   roc --version
   roc --help
+
+Options:
+  --all-errors  Show all parse errors instead of the first.
+```
+
+## Parse error diagnostics
+
+Use `--all-errors` to report every parse error in one run:
+
+```bash
+roc check --all-errors examples/for_demo.roc
 ```
 
 ## Subset supported by the interpreter

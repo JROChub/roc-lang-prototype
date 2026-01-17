@@ -94,6 +94,9 @@ class Interpreter:
   def _to_string(self, value: Any) -> str:
     if isinstance(value, bool):
       return "true" if value else "false"
+    if isinstance(value, list):
+      items = ", ".join(self._to_string(v) for v in value)
+      return "[" + items + "]"
     if isinstance(value, dict):
       items = ", ".join(f"{k}: {self._to_string(v)}" for k, v in value.items())
       return "{" + items + "}"
@@ -221,6 +224,8 @@ class Interpreter:
           raise RuntimeError(f"Duplicate field '{field.name}' in record literal", field.loc)
         record[field.name] = self.eval_expr(field.expr, env)
       return record
+    if isinstance(expr, ast.ListLiteral):
+      return [self.eval_expr(elem, env) for elem in expr.elements]
     if isinstance(expr, ast.VarRef):
       return env.get(expr.name, expr.loc)
     if isinstance(expr, ast.FieldAccess):
@@ -230,6 +235,14 @@ class Interpreter:
       if expr.field not in base:
         raise RuntimeError(f"Record has no field '{expr.field}'", expr.loc)
       return base[expr.field]
+    if isinstance(expr, ast.IndexExpr):
+      base = self.eval_expr(expr.base, env)
+      if not isinstance(base, list):
+        raise RuntimeError("Indexing expects a list", expr.loc)
+      index = self._require_int(self.eval_expr(expr.index, env), "Indexing expects an integer index", expr.index.loc)
+      if index < 0 or index >= len(base):
+        raise RuntimeError(f"Index {index} out of bounds (len {len(base)})", expr.loc)
+      return base[index]
     if isinstance(expr, ast.UnaryOp):
       value = self.eval_expr(expr.expr, env)
       if expr.op == '-':

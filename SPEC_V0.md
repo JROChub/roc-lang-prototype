@@ -23,9 +23,11 @@ interpreter in `roc/`. It is intentionally small and focused.
 - Expressions:
   - Literals: integers, strings, booleans (`true`, `false`)
   - Record literals: `{x: 1, y: 2}`
+  - List literals: `[1, 2, 3]`
   - Unary `-`, `!`
   - Binary `+`, `-`, `*`, `/`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `&&`, `||`
   - Field access: `expr.field`
+  - Indexing: `expr[index]`
   - Parentheses: `(expr)`
   - `if` expressions with `else`
   - Function calls: `name(arg1, arg2)`
@@ -95,13 +97,14 @@ unary        ::= "-" unary
                | "!" unary
                | postfix
 
-postfix      ::= primary ("." IDENT)*
+postfix      ::= primary (("." IDENT) | ("[" expr "]"))*
 
 primary      ::= INT
                | STRING
                | TRUE
                | FALSE
                | record_literal
+               | list_literal
                | IDENT
                | IDENT "(" arg_list? ")"
                | "(" expr ")"
@@ -111,6 +114,10 @@ record_literal ::= "{" field_list? "}"
 field_list   ::= field ("," field)*
 
 field        ::= IDENT ":" expr
+
+list_literal ::= "[" expr_list? "]"
+
+expr_list    ::= expr ("," expr)*
 
 arg_list     ::= expr ("," expr)*
 
@@ -139,6 +146,8 @@ type_ref     ::= IDENT
 - `break` exits the nearest loop; `continue` skips to the next iteration.
 - Record literals evaluate to records with named fields.
 - Field access reads a record field; missing fields are a runtime error.
+- List literals evaluate to lists with ordered elements.
+- Indexing reads a list element by integer index.
 - Supported type names: `Int`, `Bool`, `String`, `Unit`.
 - Truthiness: `false` is false, `true` is true, integer `0` is false, empty
   strings are false; everything else is truthy in this prototype.
@@ -165,5 +174,7 @@ Errors:
 - `for` ranges require integers; `break`/`continue` outside loops are runtime errors.
 - Record literals require unique field names.
 - Field access on non-record values is a runtime error.
+- Indexing requires integer indices and list operands.
+- Indexing out of bounds is a runtime error.
 - A minimal static type checker runs before execution and reports type errors.
 - Type errors include line/column locations where available.

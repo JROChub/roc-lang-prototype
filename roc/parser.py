@@ -277,14 +277,25 @@ class Parser:
 
   def parse_postfix(self):
     expr = self.parse_primary()
-    while self.current().kind == 'DOT':
-      self.match('DOT')
-      field_tok = self.match('IDENT')
-      expr = ast.FieldAccess(base=expr, field=field_tok.value, loc=self.loc(field_tok))
+    while True:
+      if self.current().kind == 'DOT':
+        self.match('DOT')
+        field_tok = self.match('IDENT')
+        expr = ast.FieldAccess(base=expr, field=field_tok.value, loc=self.loc(field_tok))
+        continue
+      if self.current().kind == 'LBRACKET':
+        lbrack_tok = self.match('LBRACKET')
+        index_expr = self.parse_expr()
+        self.match('RBRACKET')
+        expr = ast.IndexExpr(base=expr, index=index_expr, loc=self.loc(lbrack_tok))
+        continue
+      break
     return expr
 
   def parse_primary(self):
     tok = self.current()
+    if tok.kind == 'LBRACKET':
+      return self.parse_list_literal()
     if tok.kind == 'LBRACE':
       return self.parse_record_literal()
     if tok.kind in ('TRUE', 'FALSE'):
@@ -321,6 +332,17 @@ class Parser:
       self.match('RPAREN')
       return expr
     raise ParseError(f"Unexpected token {tok.kind} ('{tok.value}')", self.loc(tok))
+
+  def parse_list_literal(self):
+    lbrack_tok = self.match('LBRACKET')
+    elements: List[ast.Expr] = []
+    if self.current().kind != 'RBRACKET':
+      while True:
+        elements.append(self.parse_expr())
+        if self.try_match('COMMA') is None:
+          break
+    self.match('RBRACKET')
+    return ast.ListLiteral(elements=elements, loc=self.loc(lbrack_tok))
 
   def parse_record_literal(self):
     lbrace_tok = self.match('LBRACE')

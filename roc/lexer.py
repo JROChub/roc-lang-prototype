@@ -28,6 +28,8 @@ TOKEN_SPEC = [
   ('COLON',    r':'),
   ('LBRACE',   r'\{'),
   ('RBRACE',   r'\}'),
+  ('LBRACKET', r'\['),
+  ('RBRACKET', r'\]'),
   ('LPAREN',   r'\('),
   ('RPAREN',   r'\)'),
   ('COMMA',    r','),

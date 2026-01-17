@@ -29,7 +29,7 @@ BOOL = SimpleType("Bool")
 STRING = SimpleType("String")
 UNIT = SimpleType("Unit")
 
-TypeLike = Union[SimpleType, "TypeVar", "RecordType"]
+TypeLike = Union[SimpleType, "TypeVar", "RecordType", "ListType"]
 
 
 class TypeVar:
@@ -64,6 +64,14 @@ class RecordType:
     return "{" + parts + "}"
 
 
+@dataclass(frozen=True)
+class ListType:
+  element: TypeLike
+
+  def __str__(self) -> str:
+    return f"[{self.element}]"
+
+
 def _format_record_fields(record_type: "RecordType") -> str:
   return "{" + ", ".join(record_type.fields.keys()) + "}"
 
@@ -86,6 +94,9 @@ def unify(left: TypeLike, right: TypeLike, context: str, loc: Optional[ast.Sourc
       raise TypeError(f"Record fields mismatch: {left_fields} vs {right_fields} ({context})", loc)
     for name, left_field in l_res.fields.items():
       unify(left_field, r_res.fields[name], f"record field '{name}'", loc)
+    return l_res
+  if isinstance(l_res, ListType) and isinstance(r_res, ListType):
+    unify(l_res.element, r_res.element, "list element", loc)
     return l_res
   if l_res != r_res:
     raise TypeError(f"Type mismatch: {l_res} vs {r_res} ({context})", loc)
@@ -298,6 +309,14 @@ class TypeChecker:
           raise TypeError(f"Duplicate field '{field.name}' in record literal", field.loc)
         fields[field.name] = self._check_expr(field.expr, env, in_loop=in_loop)
       return RecordType(fields=fields)
+    if isinstance(expr, ast.ListLiteral):
+      if not expr.elements:
+        return ListType(element=TypeVar("list_elem"))
+      elem_type = self._check_expr(expr.elements[0], env, in_loop=in_loop)
+      for elem in expr.elements[1:]:
+        elem_t = self._check_expr(elem, env, in_loop=in_loop)
+        unify(elem_type, elem_t, "list literal", getattr(elem, "loc", None))
+      return ListType(element=elem_type)
     if isinstance(expr, ast.VarRef):
       if expr.name in self.functions:
         raise TypeError(f"Function '{expr.name}' is not a value", expr.loc)
@@ -316,6 +335,19 @@ class TypeChecker:
         available = ", ".join(base_res.fields.keys())
         raise TypeError(f"Unknown field '{expr.field}' (available: {available})", expr.loc)
       return base_res.fields[expr.field]
+    if isinstance(expr, ast.IndexExpr):
+      base_t = self._check_expr(expr.base, env, in_loop=in_loop)
+      index_t = self._check_expr(expr.index, env, in_loop=in_loop)
+      unify(index_t, INT, "list index", expr.index.loc)
+      base_res = resolve(base_t)
+      if isinstance(base_res, TypeVar):
+        elem_t = TypeVar("list_elem")
+        list_t = ListType(element=elem_t)
+        unify(base_res, list_t, "list index", expr.loc)
+        return elem_t
+      if not isinstance(base_res, ListType):
+        raise TypeError("Indexing expects a list", expr.loc)
+      return base_res.element
     if isinstance(expr, ast.UnaryOp):
       value_type = self._check_expr(expr.expr, env, in_loop=in_loop)
       if expr.op == '-':

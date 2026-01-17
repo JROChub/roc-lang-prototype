@@ -217,9 +217,11 @@ The included interpreter supports:
 - Expressions:
   - Integers, strings, booleans (`true`, `false`)
   - Record literals: `{x: 1, y: 2}`
+  - List literals: `[1, 2, 3]`
   - Unary `-`, `!`
   - Binary `+`, `-`, `*`, `/`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `&&`, `||`
   - Field access: `expr.field`
+  - Indexing: `expr[index]`
   - Parentheses
   - `if` expressions with `else`:
     `if cond { expr; } else { expr; }`
@@ -295,13 +297,14 @@ unary        ::= "-" unary
                | "!" unary
                | postfix
 
-postfix      ::= primary ("." IDENT)*
+postfix      ::= primary (("." IDENT) | ("[" expr "]"))*
 
 primary      ::= INT
                | STRING
                | TRUE
                | FALSE
                | record_literal
+               | list_literal
                | IDENT
                | IDENT "(" arg_list? ")"
                | "(" expr ")"
@@ -311,6 +314,10 @@ record_literal ::= "{" field_list? "}"
 field_list   ::= field ("," field)*
 
 field        ::= IDENT ":" expr
+
+list_literal ::= "[" expr_list? "]"
+
+expr_list    ::= expr ("," expr)*
 
 arg_list     ::= expr ("," expr)*
 
@@ -332,6 +339,8 @@ type_ref     ::= IDENT
 - `if` blocks evaluate in a child scope, so `let` bindings inside do not leak.
 - Record literals evaluate to records with named fields.
 - Field access reads a record field; missing fields are a runtime error.
+- List literals evaluate to lists with ordered elements.
+- Indexing reads a list element by integer index.
 - `while` loops evaluate the condition before each iteration and run in the current scope.
 - `for` loops iterate over integer ranges:
   - `start .. end` excludes `end`.
@@ -370,6 +379,8 @@ Errors:
 - `for` ranges require integers; `break`/`continue` outside loops are runtime errors.
 - Record literals require unique field names.
 - Field access on non-record values is a runtime error.
+- Indexing requires integer indices and list operands.
+- Indexing out of bounds is a runtime error.
 
 ---
 

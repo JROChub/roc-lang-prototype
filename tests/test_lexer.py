@@ -37,6 +37,12 @@ class LexerTests(unittest.TestCase):
     kinds = [t.kind for t in tokens]
     self.assertIn('DOT', kinds)
 
+  def test_bracket_tokens(self):
+    tokens = tokenize("fn main() { let xs = [1, 2]; return xs[0]; }")
+    kinds = [t.kind for t in tokens]
+    self.assertIn('LBRACKET', kinds)
+    self.assertIn('RBRACKET', kinds)
+
 
 if __name__ == '__main__':
   unittest.main()

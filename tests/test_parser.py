@@ -91,6 +91,14 @@ class ParserTests(unittest.TestCase):
     self.assertIsInstance(return_stmt, ast.ReturnStmt)
     self.assertIsInstance(return_stmt.expr, ast.FieldAccess)
 
+  def test_list_literal_and_index(self):
+    source = "fn main() { let xs = [1, 2, 3]; return xs[1]; }"
+    program = parse_program(source)
+    let_stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(let_stmt.expr, ast.ListLiteral)
+    return_stmt = program.functions[0].body.statements[1]
+    self.assertIsInstance(return_stmt.expr, ast.IndexExpr)
+
   def test_unclosed_block(self):
     with self.assertRaises(ParseError) as ctx:
       parse_program("fn main() { let x = 1; ")

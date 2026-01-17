@@ -115,6 +115,11 @@ class RecordLiteral(Expr):
   loc: Optional[SourceLoc] = None
 
 @dataclass
+class ListLiteral(Expr):
+  elements: List[Expr]
+  loc: Optional[SourceLoc] = None
+
+@dataclass
 class VarRef(Expr):
   name: str
   loc: Optional[SourceLoc] = None
@@ -123,6 +128,12 @@ class VarRef(Expr):
 class FieldAccess(Expr):
   base: Expr
   field: str
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class IndexExpr(Expr):
+  base: Expr
+  index: Expr
   loc: Optional[SourceLoc] = None
 
 @dataclass

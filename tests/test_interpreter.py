@@ -154,6 +154,18 @@ class InterpreterTests(unittest.TestCase):
       interp.execute()
     self.assertIn("Record has no field", str(ctx.exception))
 
+  def test_list_index(self):
+    source = "fn main() { let xs = [1, 2, 3]; return xs[0] + xs[2]; }"
+    interp = build_interpreter(source)
+    self.assertEqual(interp.execute(), 4)
+
+  def test_list_index_out_of_bounds(self):
+    source = "fn main() { let xs = [1]; return xs[2]; }"
+    interp = build_interpreter(source)
+    with self.assertRaises(RuntimeError) as ctx:
+      interp.execute()
+    self.assertIn("out of bounds", str(ctx.exception))
+
 
 if __name__ == '__main__':
   unittest.main()

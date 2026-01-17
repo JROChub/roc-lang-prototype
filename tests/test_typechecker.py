@@ -83,6 +83,20 @@ class TypeCheckerTests(unittest.TestCase):
     with self.assertRaises(TypeError):
       check_program(program)
 
+  def test_list_literal_types(self):
+    program = parse_program("fn main() { let xs = [1, 2, 3]; return xs[1]; }")
+    check_program(program)
+
+  def test_list_index_type_error(self):
+    program = parse_program("fn main() { let xs = [1, 2]; return xs[true]; }")
+    with self.assertRaises(TypeError):
+      check_program(program)
+
+  def test_index_on_non_list(self):
+    program = parse_program("fn main() { let x = 1; return x[0]; }")
+    with self.assertRaises(TypeError):
+      check_program(program)
+
 
 if __name__ == '__main__':
   unittest.main()

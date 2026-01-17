@@ -108,6 +108,12 @@ Record example:
 python -m roc.cli examples/records.roc
 ```
 
+List example:
+
+```bash
+python -m roc.cli examples/list_demo.roc
+```
+
 ## Running tests
 
 ```bash
@@ -259,9 +265,11 @@ Usage:
   - String literals: `"hello"`
   - Boolean literals: `true`, `false`
   - Record literals: `{x: 1, y: 2}`
+  - List literals: `[1, 2, 3]`
   - Unary operators: `-expr`, `!expr`
   - Binary operators: `+`, `-`, `*`, `/`, `==`, `!=`, `<`, `<=`, `>`, `>=`, `&&`, `||`
   - Field access: `expr.field`
+  - Indexing: `expr[index]`
   - Parentheses: `(expr)`
   - `if` expressions: `if cond { expr; } else { expr; }`
   - `else if` is supported as sugar for `else { if ... }`

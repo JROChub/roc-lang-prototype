@@ -31,3 +31,12 @@ python -m unittest discover -s tests
 
 - Include a small repro program and the expected vs actual output.
 - Note the interpreter version (commit hash) when possible.
+
+## Issue triage
+
+- Confirm the report is reproducible or request missing details.
+- Apply a type label (`bug`, `enhancement`, `documentation`, or `question`).
+- Verify one primary `area:` label; override auto-labeling if needed.
+- Add `good first issue` or `help wanted` when appropriate.
+- Assign a milestone when the work aligns with the roadmap.
+- Close with context if duplicate, invalid, or out of scope.

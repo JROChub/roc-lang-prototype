@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Roc Vision
+    url: https://github.com/JROChub/roc-lang-prototype/blob/main/ROC_VISION.md
+    about: Read the project vision before proposing changes.
+  - name: Roc Spec
+    url: https://github.com/JROChub/roc-lang-prototype/blob/main/SPEC.md
+    about: Check the current language spec.

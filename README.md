@@ -17,6 +17,7 @@ This ZIP includes:
 - `CONTRIBUTING.md` – contribution guide.
 - `CHANGELOG.md` – release notes.
 - `RELEASE.md` – release checklist.
+- `ROADMAP.md` – v0.2 scope and priorities.
 - `TRIAGE.md` – issue triage guide.
 - `Makefile` – release helper targets.
 - `roc/` – a minimal Roc interpreter implemented in Python for a **small v0 subset**.

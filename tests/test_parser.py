@@ -99,6 +99,13 @@ class ParserTests(unittest.TestCase):
     return_stmt = program.functions[0].body.statements[1]
     self.assertIsInstance(return_stmt.expr, ast.IndexExpr)
 
+  def test_match_expression(self):
+    source = "fn main() { return match 1 { 1 => { 10; } _ => { 0; } }; }"
+    program = parse_program(source)
+    stmt = program.functions[0].body.statements[0]
+    self.assertIsInstance(stmt.expr, ast.MatchExpr)
+    self.assertEqual(len(stmt.expr.arms), 2)
+
   def test_unclosed_block(self):
     with self.assertRaises(ParseError) as ctx:
       parse_program("fn main() { let x = 1; ")

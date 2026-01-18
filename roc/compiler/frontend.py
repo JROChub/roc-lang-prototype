@@ -77,7 +77,25 @@ def describe_expr(expr: ast.Expr) -> str:
     then_inner = ' '.join(describe_stmt(s) for s in expr.then_block.statements)
     else_inner = ' '.join(describe_stmt(s) for s in expr.else_block.statements)
     return f"if {describe_expr(expr.cond)} {{ {then_inner} }} else {{ {else_inner} }}"
+  if isinstance(expr, ast.MatchExpr):
+    arm_parts: List[str] = []
+    for arm in expr.arms:
+      body_inner = ' '.join(describe_stmt(s) for s in arm.body.statements)
+      arm_parts.append(f"{describe_pattern(arm.pattern)} => {{ {body_inner} }}")
+    arms = '; '.join(arm_parts)
+    return f"match {describe_expr(expr.subject)} {{ {arms} }}"
   if isinstance(expr, ast.CallExpr):
     args = ', '.join(describe_expr(a) for a in expr.args)
     return f"{expr.callee}({args})"
   return f"<unknown expr {expr.__class__.__name__}>"
+
+def describe_pattern(pattern: ast.Pattern) -> str:
+  if isinstance(pattern, ast.WildcardPattern):
+    return "_"
+  if isinstance(pattern, ast.IntPattern):
+    return str(pattern.value)
+  if isinstance(pattern, ast.StringPattern):
+    return repr(pattern.value)
+  if isinstance(pattern, ast.BoolPattern):
+    return "true" if pattern.value else "false"
+  return f"<unknown pattern {pattern.__class__.__name__}>"

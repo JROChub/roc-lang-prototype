@@ -30,6 +30,7 @@ interpreter in `roc/`. It is intentionally small and focused.
   - Indexing: `expr[index]`
   - Parentheses: `(expr)`
   - `if` expressions with `else`
+  - `match` expressions with literal patterns and `_` wildcard
   - Function calls: `name(arg1, arg2)`
 
 ## 2. Grammar (subset)
@@ -76,10 +77,17 @@ continue_stmt ::= "continue" ";"
 
 expr_stmt    ::= expr ";"
 
-expr         ::= if_expr
+expr         ::= match_expr
+               | if_expr
                | logical_or
 
 if_expr      ::= "if" expr block "else" block
+
+match_expr   ::= "match" expr "{" match_arm+ "}"
+
+match_arm    ::= pattern "=>" block ";"?
+
+pattern      ::= INT | STRING | TRUE | FALSE | "_"
 
 logical_or   ::= logical_and ("||" logical_and)*
 
@@ -143,6 +151,9 @@ type_ref     ::= IDENT
 - `if` expressions evaluate to the value of the last expression statement in
   the chosen branch.
 - `if` blocks evaluate in a child scope, so `let` bindings inside do not leak.
+- `match` expressions evaluate the first arm whose pattern matches the subject.
+- Match arms evaluate in child scopes like `if` blocks.
+- `_` matches any value; literal patterns match values of the same type.
 - `break` exits the nearest loop; `continue` skips to the next iteration.
 - Record literals evaluate to records with named fields.
 - Field access reads a record field; missing fields are a runtime error.
@@ -176,5 +187,6 @@ Errors:
 - Field access on non-record values is a runtime error.
 - Indexing requires integer indices and list operands.
 - Indexing out of bounds is a runtime error.
+- Non-exhaustive `match` expressions are runtime errors.
 - A minimal static type checker runs before execution and reports type errors.
 - Type errors include line/column locations where available.

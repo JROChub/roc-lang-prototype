@@ -42,6 +42,20 @@ class TypeCheckerTests(unittest.TestCase):
     with self.assertRaises(TypeError):
       check_program(program)
 
+  def test_match_expression(self):
+    program = parse_program(
+      "fn main() { return match true { true => { 1; } false => { 0; } }; }"
+    )
+    check_program(program)
+
+  def test_match_pattern_type_error(self):
+    program = parse_program(
+      "fn main() { return match 1 { \"one\" => { 1; } _ => { 0; } }; }"
+    )
+    with self.assertRaises(TypeError) as ctx:
+      check_program(program)
+    self.assertIn("Type mismatch", str(ctx.exception))
+
   def test_for_range_type_error(self):
     program = parse_program("fn main() { for i in true..3 { print(i); } }")
     with self.assertRaises(TypeError):

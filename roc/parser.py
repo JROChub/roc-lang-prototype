@@ -260,7 +260,52 @@ class Parser:
   # Expressions
 
   def parse_expr(self):
+    if self.current().kind == 'MATCH':
+      return self.parse_match_expr()
     return self.parse_if_expr()
+
+  def parse_match_expr(self):
+    match_tok = self.match('MATCH')
+    subject = self.parse_if_expr()
+    lbrace_tok = self.match('LBRACE')
+    arms: List[ast.MatchArm] = []
+    while self.current().kind != 'RBRACE':
+      if self.current().kind == 'EOF':
+        loc = self.loc(lbrace_tok)
+        raise ParseError(
+          f"Unclosed match expression, expected '}}' to match '{{' at {loc.line}:{loc.column}",
+          self.loc(self.current()),
+        )
+      pattern = self.parse_pattern()
+      arrow_tok = self.match('FATARROW')
+      body = self.parse_block()
+      arms.append(ast.MatchArm(pattern=pattern, body=body, loc=self.loc(arrow_tok)))
+      self.try_match('SEMICOL')
+    self.expect_closing('RBRACE', lbrace_tok, "match expression", "{", "}")
+    if not arms:
+      raise ParseError("Match expression requires at least one arm", self.loc(match_tok))
+    return ast.MatchExpr(subject=subject, arms=arms, loc=self.loc(match_tok))
+
+  def parse_pattern(self):
+    tok = self.current()
+    if tok.kind == 'NUMBER':
+      num_tok = self.match('NUMBER')
+      return ast.IntPattern(value=int(num_tok.value), loc=self.loc(num_tok))
+    if tok.kind == 'STRING':
+      str_tok = self.match('STRING')
+      raw = str_tok.value[1:-1]
+      try:
+        value = bytes(raw, 'utf-8').decode('unicode_escape')
+      except UnicodeDecodeError as e:
+        raise ParseError(f"Invalid string escape: {e}", self.loc(str_tok)) from None
+      return ast.StringPattern(value, loc=self.loc(str_tok))
+    if tok.kind in ('TRUE', 'FALSE'):
+      bool_tok = self.match(tok.kind)
+      return ast.BoolPattern(value=(tok.kind == 'TRUE'), loc=self.loc(bool_tok))
+    if tok.kind == 'IDENT' and tok.value == '_':
+      ident_tok = self.match('IDENT')
+      return ast.WildcardPattern(loc=self.loc(ident_tok))
+    raise ParseError(f"Unexpected pattern token {tok.kind} ('{tok.value}')", self.loc(tok))
 
   def parse_if_expr(self):
     if self.current().kind == 'IF':

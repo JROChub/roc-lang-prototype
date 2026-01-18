@@ -395,6 +395,29 @@ class TypeChecker:
       then_t = self._check_block_expr(expr.then_block, then_env, in_loop=in_loop)
       else_t = self._check_block_expr(expr.else_block, else_env, in_loop=in_loop)
       return unify(then_t, else_t, "if expression", expr.loc)
+    if isinstance(expr, ast.MatchExpr):
+      subject_t = self._check_expr(expr.subject, env, in_loop=in_loop)
+      if not expr.arms:
+        raise TypeError("match expression requires at least one arm", expr.loc)
+      result_t: Optional[TypeLike] = None
+      for arm in expr.arms:
+        if isinstance(arm.pattern, ast.IntPattern):
+          unify(subject_t, INT, "match pattern", arm.loc)
+        elif isinstance(arm.pattern, ast.StringPattern):
+          unify(subject_t, STRING, "match pattern", arm.loc)
+        elif isinstance(arm.pattern, ast.BoolPattern):
+          unify(subject_t, BOOL, "match pattern", arm.loc)
+        elif isinstance(arm.pattern, ast.WildcardPattern):
+          pass
+        else:
+          raise TypeError(f"Unknown match pattern: {arm.pattern}", arm.loc)
+        arm_env = TypeEnv(parent=env)
+        arm_t = self._check_block_expr(arm.body, arm_env, in_loop=in_loop)
+        if result_t is None:
+          result_t = arm_t
+        else:
+          result_t = unify(result_t, arm_t, "match expression", arm.loc)
+      return result_t if result_t is not None else UNIT
     if isinstance(expr, ast.CallExpr):
       if env.has(expr.callee):
         raise TypeError(f"'{expr.callee}' is not callable", expr.loc)

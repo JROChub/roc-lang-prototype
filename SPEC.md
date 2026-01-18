@@ -225,6 +225,8 @@ The included interpreter supports:
   - Parentheses
   - `if` expressions with `else`:
     `if cond { expr; } else { expr; }`
+  - `match` expressions with literal patterns and `_` wildcard:
+    `match expr { 1 => { expr; } _ => { expr; } }`
 - Function calls with positional arguments.
 - Built-in `print` for console output (0 or more args).
 
@@ -276,10 +278,17 @@ continue_stmt ::= "continue" ";"
 
 expr_stmt    ::= expr ";"
 
-expr         ::= if_expr
+expr         ::= match_expr
+               | if_expr
                | logical_or
 
 if_expr      ::= "if" expr block "else" block
+
+match_expr   ::= "match" expr "{" match_arm+ "}"
+
+match_arm    ::= pattern "=>" block ";"?
+
+pattern      ::= INT | STRING | TRUE | FALSE | "_"
 
 logical_or   ::= logical_and ("||" logical_and)*
 
@@ -337,6 +346,8 @@ type_ref     ::= IDENT
 - `return` exits the function with a value.
 - `if` expressions evaluate to the value of either branch.
 - `if` blocks evaluate in a child scope, so `let` bindings inside do not leak.
+- `match` expressions evaluate the first arm whose pattern matches the subject.
+- Match arms evaluate in child scopes like `if` blocks.
 - Record literals evaluate to records with named fields.
 - Field access reads a record field; missing fields are a runtime error.
 - List literals evaluate to lists with ordered elements.
@@ -381,6 +392,7 @@ Errors:
 - Field access on non-record values is a runtime error.
 - Indexing requires integer indices and list operands.
 - Indexing out of bounds is a runtime error.
+- Non-exhaustive `match` expressions are runtime errors.
 
 ---
 

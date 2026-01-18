@@ -102,6 +102,17 @@ class Interpreter:
       return "{" + items + "}"
     return str(value)
 
+  def _pattern_matches(self, pattern: ast.Pattern, value: Any) -> bool:
+    if isinstance(pattern, ast.WildcardPattern):
+      return True
+    if isinstance(pattern, ast.IntPattern):
+      return isinstance(value, int) and not isinstance(value, bool) and value == pattern.value
+    if isinstance(pattern, ast.StringPattern):
+      return isinstance(value, str) and value == pattern.value
+    if isinstance(pattern, ast.BoolPattern):
+      return isinstance(value, bool) and value == pattern.value
+    return False
+
   def execute(self):
     if 'main' not in self.functions:
       raise RuntimeError("No 'main' function defined")
@@ -309,6 +320,13 @@ class Interpreter:
       block = expr.then_block if truthy else expr.else_block
       child_env = Environment(parent=env)
       return self.eval_block_expr(block, child_env)
+    if isinstance(expr, ast.MatchExpr):
+      subject = self.eval_expr(expr.subject, env)
+      for arm in expr.arms:
+        if self._pattern_matches(arm.pattern, subject):
+          arm_env = Environment(parent=env)
+          return self.eval_block_expr(arm.body, arm_env)
+      raise RuntimeError("Non-exhaustive match expression", expr.loc)
     if isinstance(expr, ast.CallExpr):
       callee_val = env.get(expr.callee, expr.loc)
       args = [self.eval_expr(a, env) for a in expr.args]

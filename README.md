@@ -142,6 +142,12 @@ List example:
 python -m roc.cli examples/list_demo.roc
 ```
 
+Match example:
+
+```bash
+python -m roc.cli examples/match_demo.roc
+```
+
 ## Running tests
 
 ```bash

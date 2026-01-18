@@ -88,6 +88,34 @@ class WhileStmt(Stmt):
 class Expr:
   pass
 
+class Pattern:
+  pass
+
+@dataclass
+class WildcardPattern(Pattern):
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class IntPattern(Pattern):
+  value: int
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class StringPattern(Pattern):
+  value: str
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class BoolPattern(Pattern):
+  value: bool
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class MatchArm:
+  pattern: Pattern
+  body: Block
+  loc: Optional[SourceLoc] = None
+
 @dataclass
 class RecordField:
   name: str
@@ -154,6 +182,12 @@ class IfExpr(Expr):
   cond: Expr
   then_block: Block
   else_block: Block
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class MatchExpr(Expr):
+  subject: Expr
+  arms: List[MatchArm]
   loc: Optional[SourceLoc] = None
 
 @dataclass

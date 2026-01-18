@@ -43,6 +43,12 @@ class LexerTests(unittest.TestCase):
     self.assertIn('LBRACKET', kinds)
     self.assertIn('RBRACKET', kinds)
 
+  def test_match_tokens(self):
+    tokens = tokenize("fn main() { let x = match 1 { 1 => { 1; } _ => { 0; } }; }")
+    kinds = [t.kind for t in tokens]
+    self.assertIn('MATCH', kinds)
+    self.assertIn('FATARROW', kinds)
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -142,6 +142,28 @@ class InterpreterTests(unittest.TestCase):
     interp = build_interpreter(source)
     self.assertEqual(interp.execute(), 2)
 
+  def test_match_expression(self):
+    source = (
+      "fn main() {"
+      "  let n = 2;"
+      "  let label = match n {"
+      "    1 => { \"one\"; }"
+      "    2 => { \"two\"; }"
+      "    _ => { \"other\"; }"
+      "  };"
+      "  return label;"
+      "}"
+    )
+    interp = build_interpreter(source)
+    self.assertEqual(interp.execute(), "two")
+
+  def test_match_non_exhaustive(self):
+    source = "fn main() { return match 3 { 1 => { 10; } }; }"
+    interp = build_interpreter(source)
+    with self.assertRaises(RuntimeError) as ctx:
+      interp.execute()
+    self.assertIn("Non-exhaustive match", str(ctx.exception))
+
   def test_record_field_access(self):
     source = "fn main() { let p = {x: 1, y: 2}; return p.x + p.y; }"
     interp = build_interpreter(source)

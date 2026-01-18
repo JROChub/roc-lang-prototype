@@ -22,6 +22,7 @@ TOKEN_SPEC = [
   ('IDENT',    r'[A-Za-z_][A-Za-z0-9_]*'),
   ('COMMENT',  r'//.*'),
   ('ARROW',    r'->'),
+  ('FATARROW', r'=>'),
   ('OP',       r'\.\.=|\.\.|==|!=|<=|>=|&&|\|\||[+\-*/<>!]'),
   ('DOT',      r'\.'),
   ('EQUALS',   r'='),
@@ -41,7 +42,7 @@ TOKEN_SPEC = [
 MASTER = re.compile('|'.join(f'(?P<{name}>{pattern})' for name, pattern in TOKEN_SPEC))
 
 KEYWORDS = {
-  'module', 'fn', 'let', 'set', 'return', 'if', 'else', 'while',
+  'module', 'fn', 'let', 'set', 'return', 'if', 'else', 'while', 'match',
   'for', 'in', 'by', 'break', 'continue',
   'true', 'false',
 }

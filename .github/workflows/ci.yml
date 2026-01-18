@@ -50,3 +50,10 @@ jobs:
         run: python -m build
       - name: Check package metadata
         run: python -m twine check dist/*
+      - name: Install wheel
+        run: python -m pip install dist/*.whl
+      - name: Smoke test CLI
+        run: |
+          roc --version
+          roc run examples/hello.roc | tee /tmp/roc_hello.out
+          grep -Fx "Hello from Roc!" /tmp/roc_hello.out

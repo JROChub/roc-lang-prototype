@@ -1,10 +1,11 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Any
 
 @dataclass
 class Program:
   module_name: Optional[str]
   functions: List['FunctionDef']
+  enums: List['EnumDef'] = field(default_factory=list)
 
 @dataclass(frozen=True)
 class SourceLoc:
@@ -28,6 +29,17 @@ class FunctionDef:
   params: List[Param]
   body: 'Block'
   return_type: Optional[TypeRef] = None
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class EnumVariant:
+  name: str
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class EnumDef:
+  name: str
+  variants: List[EnumVariant]
   loc: Optional[SourceLoc] = None
 
 @dataclass
@@ -108,6 +120,11 @@ class StringPattern(Pattern):
 @dataclass
 class BoolPattern(Pattern):
   value: bool
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class EnumPattern(Pattern):
+  name: str
   loc: Optional[SourceLoc] = None
 
 @dataclass

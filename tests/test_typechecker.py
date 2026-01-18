@@ -56,6 +56,30 @@ class TypeCheckerTests(unittest.TestCase):
       check_program(program)
     self.assertIn("Type mismatch", str(ctx.exception))
 
+  def test_enum_values(self):
+    program = parse_program(
+      "enum Color { Red, Blue }"
+      "fn main() {"
+      "  let c: Color = Red;"
+      "  return if true { c; } else { Blue; };"
+      "}"
+    )
+    check_program(program)
+
+  def test_enum_match_unknown_variant(self):
+    program = parse_program(
+      "enum Color { Red }"
+      "fn main() {"
+      "  return match Red {"
+      "    Blue => { 1; }"
+      "    _ => { 0; }"
+      "  };"
+      "}"
+    )
+    with self.assertRaises(TypeError) as ctx:
+      check_program(program)
+    self.assertIn("Unknown enum variant", str(ctx.exception))
+
   def test_for_range_type_error(self):
     program = parse_program("fn main() { for i in true..3 { print(i); } }")
     with self.assertRaises(TypeError):

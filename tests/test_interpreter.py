@@ -164,6 +164,20 @@ class InterpreterTests(unittest.TestCase):
       interp.execute()
     self.assertIn("Non-exhaustive match", str(ctx.exception))
 
+  def test_enum_match(self):
+    source = (
+      "enum Color { Red, Blue }"
+      "fn main() {"
+      "  let c = Blue;"
+      "  return match c {"
+      "    Red => { 1; }"
+      "    Blue => { 2; }"
+      "  };"
+      "}"
+    )
+    interp = build_interpreter(source)
+    self.assertEqual(interp.execute(), 2)
+
   def test_record_field_access(self):
     source = "fn main() { let p = {x: 1, y: 2}; return p.x + p.y; }"
     interp = build_interpreter(source)

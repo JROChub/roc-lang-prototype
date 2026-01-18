@@ -49,6 +49,11 @@ class LexerTests(unittest.TestCase):
     self.assertIn('MATCH', kinds)
     self.assertIn('FATARROW', kinds)
 
+  def test_enum_tokens(self):
+    tokens = tokenize("enum Color { Red, Green } fn main() { return Red; }")
+    kinds = [t.kind for t in tokens]
+    self.assertIn('ENUM', kinds)
+
 
 if __name__ == '__main__':
   unittest.main()

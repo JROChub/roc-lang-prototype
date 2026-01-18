@@ -63,14 +63,18 @@ class Parser:
       ident = self.match('IDENT')
       module_name = ident.value
 
+    enums: List[ast.EnumDef] = []
     functions: List[ast.FunctionDef] = []
     while self.current().kind != 'EOF':
       try:
-        functions.append(self.parse_function())
+        if self.current().kind == 'ENUM':
+          enums.append(self.parse_enum())
+        else:
+          functions.append(self.parse_function())
       except ParseError as e:
         self.record_error(e)
-        self.synchronize(['FN'], force_advance=True)
-    program = ast.Program(module_name=module_name, functions=functions)
+        self.synchronize(['FN', 'ENUM'], force_advance=True)
+    program = ast.Program(module_name=module_name, functions=functions, enums=enums)
     if self.errors:
       first = self.errors[0]
       raise ParseError(first.message, first.loc, errors=self.errors)
@@ -108,6 +112,22 @@ class Parser:
       return_type=return_type,
       loc=self.loc(fn_tok),
     )
+
+  def parse_enum(self) -> ast.EnumDef:
+    enum_tok = self.match('ENUM')
+    name_tok = self.match('IDENT')
+    lbrace_tok = self.match('LBRACE')
+    variants: List[ast.EnumVariant] = []
+    if self.current().kind != 'RBRACE':
+      while True:
+        variant_tok = self.match('IDENT')
+        variants.append(ast.EnumVariant(name=variant_tok.value, loc=self.loc(variant_tok)))
+        if self.try_match('COMMA') is None:
+          break
+    self.expect_closing('RBRACE', lbrace_tok, "enum", "{", "}")
+    if not variants:
+      raise ParseError("Enum requires at least one variant", self.loc(enum_tok))
+    return ast.EnumDef(name=name_tok.value, variants=variants, loc=self.loc(enum_tok))
 
   def parse_type(self) -> ast.TypeRef:
     type_tok = self.match('IDENT')
@@ -305,6 +325,9 @@ class Parser:
     if tok.kind == 'IDENT' and tok.value == '_':
       ident_tok = self.match('IDENT')
       return ast.WildcardPattern(loc=self.loc(ident_tok))
+    if tok.kind == 'IDENT':
+      ident_tok = self.match('IDENT')
+      return ast.EnumPattern(name=ident_tok.value, loc=self.loc(ident_tok))
     raise ParseError(f"Unexpected pattern token {tok.kind} ('{tok.value}')", self.loc(tok))
 
   def parse_if_expr(self):

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 from . import ast
 
@@ -21,6 +22,11 @@ class ContinueSignal(Exception):
   def __init__(self, loc: Optional[ast.SourceLoc] = None):
     super().__init__()
     self.loc = loc
+
+@dataclass(frozen=True)
+class EnumValue:
+  enum_name: str
+  variant: str
 
 class Environment:
   def __init__(self, parent: Optional['Environment'] = None):
@@ -70,6 +76,7 @@ class Interpreter:
     self.global_env = Environment()
     self.functions: Dict[str, FunctionValue] = {}
     self._install_builtins()
+    self._install_enums()
     # Register functions
     for fn in self.program.functions:
       if fn.name in self.functions or fn.name in self.global_env.values:
@@ -91,9 +98,25 @@ class Interpreter:
 
     self.global_env.define('print', builtin_print)
 
+  def _install_enums(self):
+    seen_enums = set()
+    seen_variants = set()
+    for enum_def in self.program.enums:
+      if enum_def.name in seen_enums:
+        raise RuntimeError(f"Enum '{enum_def.name}' already defined", enum_def.loc)
+      seen_enums.add(enum_def.name)
+      for variant in enum_def.variants:
+        if variant.name in seen_variants:
+          raise RuntimeError(f"Enum variant '{variant.name}' already defined", variant.loc)
+        value = EnumValue(enum_name=enum_def.name, variant=variant.name)
+        self.global_env.define(variant.name, value, variant.loc)
+        seen_variants.add(variant.name)
+
   def _to_string(self, value: Any) -> str:
     if isinstance(value, bool):
       return "true" if value else "false"
+    if isinstance(value, EnumValue):
+      return f"{value.enum_name}.{value.variant}"
     if isinstance(value, list):
       items = ", ".join(self._to_string(v) for v in value)
       return "[" + items + "]"
@@ -111,6 +134,8 @@ class Interpreter:
       return isinstance(value, str) and value == pattern.value
     if isinstance(pattern, ast.BoolPattern):
       return isinstance(value, bool) and value == pattern.value
+    if isinstance(pattern, ast.EnumPattern):
+      return isinstance(value, EnumValue) and value.variant == pattern.name
     return False
 
   def execute(self):
@@ -354,6 +379,9 @@ class Interpreter:
   def _ensure_same_type(self, left: Any, right: Any, op: str, loc: Optional[ast.SourceLoc]):
     if type(left) is not type(right):
       raise RuntimeError(f"Operator '{op}' expects matching types", loc)
+    if isinstance(left, EnumValue) and isinstance(right, EnumValue):
+      if left.enum_name != right.enum_name:
+        raise RuntimeError(f"Operator '{op}' expects matching enum types", loc)
 
   def _ensure_bool(self, value: Any, op: str, loc: Optional[ast.SourceLoc]) -> bool:
     if not isinstance(value, bool):

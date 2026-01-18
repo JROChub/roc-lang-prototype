@@ -6,6 +6,7 @@ interpreter in `roc/`. It is intentionally small and focused.
 ## 1. Syntax overview
 
 - Optional module header: `module main`
+- Enum definitions: `enum Color { Red, Green, Blue }`
 - Function definitions: `fn name(params) { ... }`
 - Optional type annotations on parameters, returns, and `let` bindings.
 - Statements:
@@ -36,9 +37,13 @@ interpreter in `roc/`. It is intentionally small and focused.
 ## 2. Grammar (subset)
 
 ```text
-program      ::= module_decl? fn_def*
+program      ::= module_decl? (enum_def | fn_def)*
 
 module_decl  ::= "module" IDENT
+
+enum_def     ::= "enum" IDENT "{" enum_variants "}"
+
+enum_variants ::= IDENT ("," IDENT)*
 
 fn_def       ::= "fn" IDENT "(" param_list? ")" return_type? block
 
@@ -87,7 +92,7 @@ match_expr   ::= "match" expr "{" match_arm+ "}"
 
 match_arm    ::= pattern "=>" block ";"?
 
-pattern      ::= INT | STRING | TRUE | FALSE | "_"
+pattern      ::= INT | STRING | TRUE | FALSE | "_" | IDENT
 
 logical_or   ::= logical_and ("||" logical_and)*
 
@@ -154,12 +159,14 @@ type_ref     ::= IDENT
 - `match` expressions evaluate the first arm whose pattern matches the subject.
 - Match arms evaluate in child scopes like `if` blocks.
 - `_` matches any value; literal patterns match values of the same type.
+- Enum definitions introduce new types and variants.
+- Enum variants are values available in expressions and `match` patterns.
 - `break` exits the nearest loop; `continue` skips to the next iteration.
 - Record literals evaluate to records with named fields.
 - Field access reads a record field; missing fields are a runtime error.
 - List literals evaluate to lists with ordered elements.
 - Indexing reads a list element by integer index.
-- Supported type names: `Int`, `Bool`, `String`, `Unit`.
+- Supported type names: `Int`, `Bool`, `String`, `Unit`, plus enum names.
 - Truthiness: `false` is false, `true` is true, integer `0` is false, empty
   strings are false; everything else is truthy in this prototype.
 

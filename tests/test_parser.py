@@ -53,6 +53,13 @@ class ParserTests(unittest.TestCase):
     self.assertIsInstance(stmt, ast.ForStmt)
     self.assertIsNotNone(stmt.step)
 
+  def test_enum_definition(self):
+    program = parse_program("enum Color { Red, Green } fn main() { return Red; }")
+    self.assertEqual(len(program.enums), 1)
+    enum_def = program.enums[0]
+    self.assertEqual(enum_def.name, "Color")
+    self.assertEqual([v.name for v in enum_def.variants], ["Red", "Green"])
+
   def test_type_annotations(self):
     program = parse_program("fn add(a: Int, b: Int) -> Int { return a + b; }")
     fn = program.functions[0]

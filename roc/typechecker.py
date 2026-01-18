@@ -29,7 +29,7 @@ BOOL = SimpleType("Bool")
 STRING = SimpleType("String")
 UNIT = SimpleType("Unit")
 
-TypeLike = Union[SimpleType, "TypeVar", "RecordType", "ListType"]
+TypeLike = Union[SimpleType, "TypeVar", "RecordType", "ListType", "EnumType"]
 
 
 class TypeVar:
@@ -72,6 +72,15 @@ class ListType:
     return f"[{self.element}]"
 
 
+@dataclass(frozen=True)
+class EnumType:
+  name: str
+  variants: List[str]
+
+  def __str__(self) -> str:
+    return self.name
+
+
 def _format_record_fields(record_type: "RecordType") -> str:
   return "{" + ", ".join(record_type.fields.keys()) + "}"
 
@@ -97,6 +106,10 @@ def unify(left: TypeLike, right: TypeLike, context: str, loc: Optional[ast.Sourc
     return l_res
   if isinstance(l_res, ListType) and isinstance(r_res, ListType):
     unify(l_res.element, r_res.element, "list element", loc)
+    return l_res
+  if isinstance(l_res, EnumType) and isinstance(r_res, EnumType):
+    if l_res.name != r_res.name:
+      raise TypeError(f"Type mismatch: {l_res} vs {r_res} ({context})", loc)
     return l_res
   if l_res != r_res:
     raise TypeError(f"Type mismatch: {l_res} vs {r_res} ({context})", loc)
@@ -148,6 +161,10 @@ class TypeChecker:
   def __init__(self, program: ast.Program):
     self.program = program
     self.functions: Dict[str, FunctionType] = {}
+    self.enums: Dict[str, EnumType] = {}
+    self.variant_types: Dict[str, EnumType] = {}
+    self.global_env = TypeEnv()
+    self._collect_enums()
     self._collect_functions()
 
   def _type_from_ref(self, type_ref: ast.TypeRef) -> SimpleType:
@@ -160,12 +177,37 @@ class TypeChecker:
       return STRING
     if name == "Unit":
       return UNIT
+    if name in self.enums:
+      return self.enums[name]
     raise TypeError(f"Unknown type '{name}'", type_ref.loc)
+
+  def _collect_enums(self):
+    for enum_def in self.program.enums:
+      if enum_def.name in self.enums:
+        raise TypeError(f"Enum '{enum_def.name}' already defined", enum_def.loc)
+      variant_names = []
+      for variant in enum_def.variants:
+        if variant.name in variant_names:
+          raise TypeError(f"Enum variant '{variant.name}' already defined", variant.loc)
+        if variant.name in self.variant_types:
+          raise TypeError(f"Enum variant '{variant.name}' already defined", variant.loc)
+        if variant.name == "print":
+          raise TypeError("Enum variant 'print' conflicts with built-in function", variant.loc)
+        variant_names.append(variant.name)
+      enum_type = EnumType(name=enum_def.name, variants=variant_names)
+      self.enums[enum_def.name] = enum_type
+      for variant in enum_def.variants:
+        self.variant_types[variant.name] = enum_type
+        self.global_env.define(variant.name, enum_type, variant.loc)
 
   def _collect_functions(self):
     for fn in self.program.functions:
       if fn.name in self.functions:
         raise TypeError(f"Function '{fn.name}' already defined", fn.loc)
+      if fn.name in self.enums:
+        raise TypeError(f"Function '{fn.name}' conflicts with enum name", fn.loc)
+      if fn.name in self.variant_types:
+        raise TypeError(f"Function '{fn.name}' conflicts with enum variant", fn.loc)
       params: List[TypeLike] = []
       for param in fn.params:
         if param.type_ann is not None:
@@ -184,7 +226,7 @@ class TypeChecker:
 
   def _check_function(self, fn: ast.FunctionDef):
     fn_type = self.functions[fn.name]
-    env = TypeEnv()
+    env = TypeEnv(parent=self.global_env)
     for param, t in zip(fn.params, fn_type.params):
       env.define(param.name, t, param.loc)
     has_return = False
@@ -407,6 +449,10 @@ class TypeChecker:
           unify(subject_t, STRING, "match pattern", arm.loc)
         elif isinstance(arm.pattern, ast.BoolPattern):
           unify(subject_t, BOOL, "match pattern", arm.loc)
+        elif isinstance(arm.pattern, ast.EnumPattern):
+          if arm.pattern.name not in self.variant_types:
+            raise TypeError(f"Unknown enum variant '{arm.pattern.name}'", arm.loc)
+          unify(subject_t, self.variant_types[arm.pattern.name], "match pattern", arm.loc)
         elif isinstance(arm.pattern, ast.WildcardPattern):
           pass
         else:

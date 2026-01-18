@@ -208,6 +208,7 @@ fn pure() -> Int {
 The included interpreter supports:
 
 - A single module per file (optional `module` header).
+- Enum definitions: `enum Color { Red, Green, Blue }`.
 - Function definitions: `fn name(args) { ... }`
 - Function signatures and `let` bindings may include optional type annotations.
 - `let` bindings, `set` assignments, and `return` statements inside function bodies.
@@ -237,9 +238,13 @@ Execution starts at `fn main()` with no arguments.
 ## 4. Informal grammar (subset)
 
 ```text
-program      ::= module_decl? fn_def*
+program      ::= module_decl? (enum_def | fn_def)*
 
 module_decl  ::= "module" IDENT
+
+enum_def     ::= "enum" IDENT "{" enum_variants "}"
+
+enum_variants ::= IDENT ("," IDENT)*
 
 fn_def       ::= "fn" IDENT "(" param_list? ")" return_type? block
 
@@ -288,7 +293,7 @@ match_expr   ::= "match" expr "{" match_arm+ "}"
 
 match_arm    ::= pattern "=>" block ";"?
 
-pattern      ::= INT | STRING | TRUE | FALSE | "_"
+pattern      ::= INT | STRING | TRUE | FALSE | "_" | IDENT
 
 logical_or   ::= logical_and ("||" logical_and)*
 
@@ -348,6 +353,8 @@ type_ref     ::= IDENT
 - `if` blocks evaluate in a child scope, so `let` bindings inside do not leak.
 - `match` expressions evaluate the first arm whose pattern matches the subject.
 - Match arms evaluate in child scopes like `if` blocks.
+- Enum definitions introduce new types and variants.
+- Enum variants are values available in expressions and `match` patterns.
 - Record literals evaluate to records with named fields.
 - Field access reads a record field; missing fields are a runtime error.
 - List literals evaluate to lists with ordered elements.
@@ -363,7 +370,7 @@ type_ref     ::= IDENT
 Type annotations:
 
 - Optional annotations are supported on parameters, returns, and `let` bindings.
-- Supported type names: `Int`, `Bool`, `String`, `Unit`.
+- Supported type names: `Int`, `Bool`, `String`, `Unit`, plus enum names.
 
 Truthiness for `if`:
 

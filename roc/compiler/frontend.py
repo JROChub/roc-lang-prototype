@@ -1,12 +1,18 @@
 from typing import List
 from .. import ast
-from .ir import IRModule, IRFunction
+from .ir import IRModule, IRFunction, IREnum
 
 def lower_program(program: ast.Program) -> IRModule:
   mod = IRModule()
+  for enum_def in program.enums:
+    mod.enums.append(lower_enum(enum_def))
   for fn in program.functions:
     mod.functions.append(lower_function(fn))
   return mod
+
+def lower_enum(enum_def: ast.EnumDef) -> IREnum:
+  variants = [variant.name for variant in enum_def.variants]
+  return IREnum(name=enum_def.name, variants=variants)
 
 def lower_function(fn: ast.FunctionDef) -> IRFunction:
   params = [describe_param(p) for p in fn.params]
@@ -98,4 +104,6 @@ def describe_pattern(pattern: ast.Pattern) -> str:
     return repr(pattern.value)
   if isinstance(pattern, ast.BoolPattern):
     return "true" if pattern.value else "false"
+  if isinstance(pattern, ast.EnumPattern):
+    return pattern.name
   return f"<unknown pattern {pattern.__class__.__name__}>"

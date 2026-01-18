@@ -25,8 +25,9 @@ This ZIP includes:
 - `examples/` – runnable `.roc` programs.
 
 > Note: The interpreter is intentionally small. It runs a Roc *subset* with
-> functions, conditionals, loops, arithmetic, booleans, and printing. It is
-> meant as a working playground, not a production compiler.
+> functions, conditionals, loops, records, lists, match expressions, enums,
+> arithmetic, booleans, and printing. It is meant as a working playground,
+> not a production compiler.
 >
 > A minimal static type checker for `Int`, `Bool`, and `String` runs before
 > execution and reports type errors.
@@ -146,6 +147,12 @@ Match example:
 
 ```bash
 python -m roc.cli examples/match_demo.roc
+```
+
+Enum example:
+
+```bash
+python -m roc.cli examples/enum_demo.roc
 ```
 
 ## Running tests

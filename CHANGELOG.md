@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- No changes yet.
+
+## 0.3.0
+
 - Add `match` expressions with literal patterns and `_` wildcard.
 - Add enum definitions with variant values and enum pattern matching.
 - Add enum payload constructors and payload patterns.

@@ -4,9 +4,8 @@ Use this checklist to cut a new release.
 
 1. Update `CHANGELOG.md`
    - Move items from "Unreleased" into a new version section.
-2. Bump version numbers
+2. Bump version number
    - `pyproject.toml`
-   - `roc/__init__.py`
 3. Run tests
    - `python -m unittest discover -s tests`
 4. Tag the release

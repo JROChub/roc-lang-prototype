@@ -1,3 +1,9 @@
-# Roc prototype interpreter package
+from importlib.metadata import PackageNotFoundError, version
 
-__version__ = "0.1.0"
+def _resolve_version() -> str:
+  try:
+    return version("roc-lang-prototype")
+  except PackageNotFoundError:
+    return "0.0.0+local"
+
+__version__ = _resolve_version()

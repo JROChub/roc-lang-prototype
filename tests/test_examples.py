@@ -12,16 +12,17 @@ EXPECTED_DIR = EXAMPLES_DIR / "expected"
 
 class ExampleOutputTests(unittest.TestCase):
   def test_examples_match_expected_output(self):
-    example_paths = sorted(EXAMPLES_DIR.glob("*.roc"))
-    self.assertTrue(example_paths, "No examples found")
-
+    example_paths = sorted(EXAMPLES_DIR.rglob("*.roc"))
+    runnable = []
     for example_path in example_paths:
-      expected_path = EXPECTED_DIR / (example_path.stem + ".out")
-      self.assertTrue(
-        expected_path.exists(),
-        f"Missing expected output for {example_path.name}",
-      )
+      relative = example_path.relative_to(EXAMPLES_DIR)
+      expected_path = EXPECTED_DIR / relative.with_suffix(".out")
+      if expected_path.exists():
+        runnable.append((example_path, expected_path))
 
+    self.assertTrue(runnable, "No runnable examples found")
+
+    for example_path, expected_path in runnable:
       buf = io.StringIO()
       with contextlib.redirect_stdout(buf):
         exit_code = cli.run_path(str(example_path))

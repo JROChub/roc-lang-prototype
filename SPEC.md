@@ -209,6 +209,7 @@ The included interpreter supports:
 
 - A single module per file (optional `module` header).
 - Enum definitions: `enum Color { Red, Green, Blue }`.
+- Import declarations: `import math_utils;`.
 - Function definitions: `fn name(args) { ... }`
 - Function signatures and `let` bindings may include optional type annotations.
 - `let` bindings, `set` assignments, and `return` statements inside function bodies.
@@ -238,9 +239,11 @@ Execution starts at `fn main()` with no arguments.
 ## 4. Informal grammar (subset)
 
 ```text
-program      ::= module_decl? (enum_def | fn_def)*
+program      ::= module_decl? import_decl* (enum_def | fn_def)*
 
 module_decl  ::= "module" IDENT
+
+import_decl  ::= "import" IDENT ";"
 
 enum_def     ::= "enum" IDENT "{" enum_variants "}"
 
@@ -346,6 +349,8 @@ type_ref     ::= IDENT
 
 - `main` is the entry point.
 - Each function call creates a new scope with its own variables.
+- Imports load sibling `.roc` files by name (e.g., `import math_utils;` loads `math_utils.roc`).
+- Imported definitions are added to the global scope; name collisions are errors.
 - `let` defines a binding in the current scope (redefining in the same scope is an error).
 - `set` updates an existing binding in the nearest enclosing scope.
 - `return` exits the function with a value.

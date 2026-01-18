@@ -4,6 +4,7 @@
 
 - Add `match` expressions with literal patterns and `_` wildcard.
 - Add enum definitions with variant values and enum pattern matching.
+- Add import declarations for single-file modules.
 - Add conformance fixtures and parser fuzz coverage.
 
 ## 0.2.0

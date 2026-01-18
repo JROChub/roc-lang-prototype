@@ -20,13 +20,14 @@ class ParseError(Exception):
     return self.message
 
 class Parser:
-  def __init__(self, tokens: List[Token]):
+  def __init__(self, tokens: List[Token], source_path: Optional[str] = None):
     self.tokens = tokens
     self.pos = 0
     self.errors: List[ParseError] = []
+    self.source_path = source_path
 
   def loc(self, tok: Token) -> ast.SourceLoc:
-    return ast.SourceLoc(line=tok.line, column=tok.column)
+    return ast.SourceLoc(line=tok.line, column=tok.column, file=self.source_path)
 
   def current(self) -> Token:
     return self.tokens[self.pos]
@@ -63,6 +64,10 @@ class Parser:
       ident = self.match('IDENT')
       module_name = ident.value
 
+    imports: List[ast.ImportDecl] = []
+    while self.current().kind == 'IMPORT':
+      imports.append(self.parse_import())
+
     enums: List[ast.EnumDef] = []
     functions: List[ast.FunctionDef] = []
     while self.current().kind != 'EOF':
@@ -73,8 +78,8 @@ class Parser:
           functions.append(self.parse_function())
       except ParseError as e:
         self.record_error(e)
-        self.synchronize(['FN', 'ENUM'], force_advance=True)
-    program = ast.Program(module_name=module_name, functions=functions, enums=enums)
+        self.synchronize(['FN', 'ENUM', 'IMPORT'], force_advance=True)
+    program = ast.Program(module_name=module_name, functions=functions, enums=enums, imports=imports)
     if self.errors:
       first = self.errors[0]
       raise ParseError(first.message, first.loc, errors=self.errors)
@@ -113,6 +118,12 @@ class Parser:
       loc=self.loc(fn_tok),
     )
 
+  def parse_import(self) -> ast.ImportDecl:
+    import_tok = self.match('IMPORT')
+    name_tok = self.match('IDENT')
+    self.expect_semicolon("import statement")
+    return ast.ImportDecl(name=name_tok.value, loc=self.loc(import_tok))
+
   def parse_enum(self) -> ast.EnumDef:
     enum_tok = self.match('ENUM')
     name_tok = self.match('IDENT')
@@ -144,9 +155,9 @@ class Parser:
           f"Unclosed block, expected '}}' to match '{{' at {loc.line}:{loc.column}",
           self.loc(tok),
         )
-      if self.current().kind in ('FN', 'MODULE'):
+      if self.current().kind in ('FN', 'MODULE', 'ENUM', 'IMPORT'):
         tok = self.current()
-        raise ParseError("Missing '}' before function or module definition", self.loc(tok))
+        raise ParseError("Missing '}' before top-level declaration", self.loc(tok))
       try:
         statements.append(self.parse_statement())
       except ParseError as e:

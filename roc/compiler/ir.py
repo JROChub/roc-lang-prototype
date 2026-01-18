@@ -17,9 +17,14 @@ class IRFunction:
 class IRModule:
   functions: List[IRFunction] = field(default_factory=list)
   enums: List[IREnum] = field(default_factory=list)
+  imports: List[str] = field(default_factory=list)
 
   def pretty(self) -> str:
     lines = []
+    for imp in self.imports:
+      lines.append(f"import {imp};")
+    if self.imports:
+      lines.append("")
     for enum in self.enums:
       variants = ", ".join(enum.variants)
       lines.append(f"enum {enum.name} {{ {variants} }}\n")

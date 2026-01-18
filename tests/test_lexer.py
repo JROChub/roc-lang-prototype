@@ -54,6 +54,11 @@ class LexerTests(unittest.TestCase):
     kinds = [t.kind for t in tokens]
     self.assertIn('ENUM', kinds)
 
+  def test_import_tokens(self):
+    tokens = tokenize("import math_utils; fn main() { return 0; }")
+    kinds = [t.kind for t in tokens]
+    self.assertIn('IMPORT', kinds)
+
 
 if __name__ == '__main__':
   unittest.main()

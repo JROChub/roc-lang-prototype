@@ -60,6 +60,11 @@ class ParserTests(unittest.TestCase):
     self.assertEqual(enum_def.name, "Color")
     self.assertEqual([v.name for v in enum_def.variants], ["Red", "Green"])
 
+  def test_import_definition(self):
+    program = parse_program("import util; fn main() { return 1; }")
+    self.assertEqual(len(program.imports), 1)
+    self.assertEqual(program.imports[0].name, "util")
+
   def test_type_annotations(self):
     program = parse_program("fn add(a: Int, b: Int) -> Int { return a + b; }")
     fn = program.functions[0]
@@ -137,7 +142,7 @@ class ParserTests(unittest.TestCase):
     source = "fn main() { let x = 1; fn other() { return 2; }"
     with self.assertRaises(ParseError) as ctx:
       parse_program(source)
-    self.assertIn("Missing '}' before function", str(ctx.exception))
+    self.assertIn("Missing '}' before top-level declaration", str(ctx.exception))
 
 
 if __name__ == '__main__':

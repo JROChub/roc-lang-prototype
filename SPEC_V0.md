@@ -7,6 +7,7 @@ interpreter in `roc/`. It is intentionally small and focused.
 
 - Optional module header: `module main`
 - Enum definitions: `enum Color { Red, Green, Blue }`
+- Import declarations: `import math_utils;`
 - Function definitions: `fn name(params) { ... }`
 - Optional type annotations on parameters, returns, and `let` bindings.
 - Statements:
@@ -37,9 +38,11 @@ interpreter in `roc/`. It is intentionally small and focused.
 ## 2. Grammar (subset)
 
 ```text
-program      ::= module_decl? (enum_def | fn_def)*
+program      ::= module_decl? import_decl* (enum_def | fn_def)*
 
 module_decl  ::= "module" IDENT
+
+import_decl  ::= "import" IDENT ";"
 
 enum_def     ::= "enum" IDENT "{" enum_variants "}"
 
@@ -143,6 +146,8 @@ type_ref     ::= IDENT
 
 - Execution begins at `fn main()`.
 - Each function call creates a new scope.
+- Imports load sibling `.roc` files by name (e.g., `import math_utils;` loads `math_utils.roc`).
+- Imported definitions are added to the global scope; name collisions are errors.
 - `let` defines a binding in the current scope. Redefining a name in the same
   scope is an error.
 - `set` updates an existing binding in the nearest enclosing scope.

@@ -4,6 +4,7 @@ from .ir import IRModule, IRFunction, IREnum
 
 def lower_program(program: ast.Program) -> IRModule:
   mod = IRModule()
+  mod.imports = [imp.name for imp in program.imports]
   for enum_def in program.enums:
     mod.enums.append(lower_enum(enum_def))
   for fn in program.functions:

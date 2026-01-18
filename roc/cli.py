@@ -1,7 +1,9 @@
 import sys
+from typing import Optional
 from . import ast
 from .diagnostics import render_diagnostic
 from .lexer import normalize_newlines, tokenize, LexError
+from .loader import LoadError, load_program
 from .parser import Parser, ParseError
 from .interpreter import Interpreter, RuntimeError
 from .typechecker import check_program, TypeError
@@ -14,18 +16,44 @@ Options:
 
 def run_path(path: str, check_only: bool = False, all_errors: bool = False) -> int:
   try:
-    with open(path, 'r', encoding='utf-8') as f:
-      source = f.read()
-  except OSError as e:
-    print(f"Error reading {path}: {e}")
+    result = load_program(path)
+    program = result.program
+    sources = result.sources
+    check_program(program)
+    if check_only:
+      return 0
+    interp = Interpreter(program)
+    interp.execute()
+    return 0
+  except LoadError as e:
+    if e.errors and all_errors:
+      rendered = [
+        render_diagnostic("Parse error", err.message, e.source, err.loc, e.path)
+        for err in e.errors
+      ]
+      print("\n\n".join(rendered))
+      return 1
+    print(render_diagnostic(e.kind, e.message, e.source, e.loc, e.path))
     return 1
-  return run_source(source, path, check_only=check_only, all_errors=all_errors)
+  except TypeError as e:
+    source, path = _lookup_source(e.loc, path, sources)
+    message = getattr(e, "message", str(e))
+    print(render_diagnostic("Type error", message, source, e.loc, path))
+    return 1
+  except RuntimeError as e:
+    if getattr(e, "loc", None) is not None:
+      source, path = _lookup_source(e.loc, path, sources)
+      message = getattr(e, "message", str(e))
+      print(render_diagnostic("Runtime error", message, source, e.loc, path))
+    else:
+      print(f"Runtime error: {e}")
+    return 1
 
 def run_source(source: str, path: str, check_only: bool = False, all_errors: bool = False) -> int:
   normalized = normalize_newlines(source)
   try:
     tokens = tokenize(normalized)
-    parser = Parser(tokens)
+    parser = Parser(tokens, source_path=path)
     program = parser.parse_program()
     check_program(program)
     if check_only:
@@ -34,7 +62,7 @@ def run_source(source: str, path: str, check_only: bool = False, all_errors: boo
     interp.execute()
     return 0
   except LexError as e:
-    loc = ast.SourceLoc(line=e.line, column=e.column)
+    loc = ast.SourceLoc(line=e.line, column=e.column, file=path)
     message = getattr(e, "message", str(e))
     print(render_diagnostic("Lex error", message, normalized, loc, path))
     return 1
@@ -61,6 +89,12 @@ def run_source(source: str, path: str, check_only: bool = False, all_errors: boo
     else:
       print(f"Runtime error: {e}")
     return 1
+
+def _lookup_source(loc: Optional[ast.SourceLoc], default_path: str, sources):
+  if loc is not None and loc.file:
+    source = sources.get(loc.file, "")
+    return source or "", loc.file
+  return sources.get(default_path, ""), default_path
 
 def main(argv=None):
   if argv is None:

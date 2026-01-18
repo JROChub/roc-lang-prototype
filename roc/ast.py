@@ -6,11 +6,18 @@ class Program:
   module_name: Optional[str]
   functions: List['FunctionDef']
   enums: List['EnumDef'] = field(default_factory=list)
+  imports: List['ImportDecl'] = field(default_factory=list)
 
 @dataclass(frozen=True)
 class SourceLoc:
   line: int
   column: int
+  file: Optional[str] = None
+
+@dataclass
+class ImportDecl:
+  name: str
+  loc: Optional[SourceLoc] = None
 
 @dataclass
 class TypeRef:

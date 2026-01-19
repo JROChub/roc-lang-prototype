@@ -10,6 +10,7 @@
 - Exported enums no longer implicitly export their variants.
 - Allow module-qualified enum types in annotations (for example, `colors.Color`).
 - Add CI quality gates for linting, formatting, type checking, and coverage.
+- Raise coverage gate to 80%.
 
 ## 0.3.0
 

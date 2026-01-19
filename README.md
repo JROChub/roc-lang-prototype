@@ -26,18 +26,26 @@ This ZIP includes:
 
 > Note: The interpreter is intentionally small. It runs a Roc *subset* with
 > functions, conditionals, loops, records, lists, match expressions, enums,
+> imports,
 > arithmetic, booleans, and printing. It is meant as a working playground,
 > not a production compiler.
 >
 > A minimal static type checker for `Int`, `Bool`, and `String` runs before
 > execution and reports type errors.
 
-## What's new in v0.2.0
+## What's new in v0.3.0
 
-- Records and lists with field access and indexing.
-- `for` loops support `by` step sizes plus `break`/`continue`.
-- Parser diagnostics now show multiple errors via `--all-errors`.
-- Roadmap: see [ROADMAP.md](ROADMAP.md).
+- `match` expressions, enums, and enum payloads.
+- Module imports with a minimal loader.
+- Conformance fixtures and parser fuzz coverage.
+
+## Unreleased (main branch)
+
+- Scoped module namespaces (imports require qualification, e.g. `math.add(...)`).
+- Explicit exports (`export { ... }`) control module visibility.
+- Exported enums are type-only; variants must be listed explicitly.
+- Enum payload bindings in match patterns (for example, `Some(x)`).
+- Module-qualified enum types in annotations (for example, `colors.Color`).
 
 ## Requirements
 
@@ -111,6 +119,18 @@ Expected output:
 
 ```text
 Result is 42
+```
+
+Module example with qualified enum types:
+
+```bash
+python -m roc run examples/modules/type_qual_demo.roc
+```
+
+Expected output:
+
+```text
+red
 ```
 
 Logic example:

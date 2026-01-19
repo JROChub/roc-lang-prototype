@@ -42,7 +42,7 @@ TOKEN_SPEC = [
 MASTER = re.compile('|'.join(f'(?P<{name}>{pattern})' for name, pattern in TOKEN_SPEC))
 
 KEYWORDS = {
-  'module', 'import', 'fn', 'let', 'set', 'return', 'if', 'else', 'while', 'match', 'enum',
+  'module', 'import', 'export', 'as', 'fn', 'let', 'set', 'return', 'if', 'else', 'while', 'match', 'enum',
   'for', 'in', 'by', 'break', 'continue',
   'true', 'false',
 }

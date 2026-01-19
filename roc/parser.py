@@ -65,8 +65,12 @@ class Parser:
       module_name = ident.value
 
     imports: List[ast.ImportDecl] = []
-    while self.current().kind == 'IMPORT':
-      imports.append(self.parse_import())
+    exports: List[ast.ExportDecl] = []
+    while self.current().kind in ('IMPORT', 'EXPORT'):
+      if self.current().kind == 'IMPORT':
+        imports.append(self.parse_import())
+      else:
+        exports.append(self.parse_export())
 
     enums: List[ast.EnumDef] = []
     functions: List[ast.FunctionDef] = []
@@ -78,8 +82,14 @@ class Parser:
           functions.append(self.parse_function())
       except ParseError as e:
         self.record_error(e)
-        self.synchronize(['FN', 'ENUM', 'IMPORT'], force_advance=True)
-    program = ast.Program(module_name=module_name, functions=functions, enums=enums, imports=imports)
+        self.synchronize(['FN', 'ENUM', 'IMPORT', 'EXPORT'], force_advance=True)
+    program = ast.Program(
+      module_name=module_name,
+      functions=functions,
+      enums=enums,
+      imports=imports,
+      exports=exports,
+    )
     if self.errors:
       first = self.errors[0]
       raise ParseError(first.message, first.loc, errors=self.errors)
@@ -121,8 +131,29 @@ class Parser:
   def parse_import(self) -> ast.ImportDecl:
     import_tok = self.match('IMPORT')
     name_tok = self.match('IDENT')
+    alias = None
+    if self.current().kind == 'AS':
+      self.match('AS')
+      alias_tok = self.match('IDENT')
+      alias = alias_tok.value
     self.expect_semicolon("import statement")
-    return ast.ImportDecl(name=name_tok.value, loc=self.loc(import_tok))
+    return ast.ImportDecl(name=name_tok.value, alias=alias, loc=self.loc(import_tok))
+
+  def parse_export(self) -> ast.ExportDecl:
+    export_tok = self.match('EXPORT')
+    lbrace_tok = self.match('LBRACE')
+    names: List[str] = []
+    if self.current().kind != 'RBRACE':
+      while True:
+        name_tok = self.match('IDENT')
+        names.append(name_tok.value)
+        if self.try_match('COMMA') is None:
+          break
+    self.expect_closing('RBRACE', lbrace_tok, "export list", "{", "}")
+    if not names:
+      raise ParseError("Export list requires at least one name", self.loc(export_tok))
+    self.expect_semicolon("export statement")
+    return ast.ExportDecl(names=names, loc=self.loc(export_tok))
 
   def parse_enum(self) -> ast.EnumDef:
     enum_tok = self.match('ENUM')
@@ -153,7 +184,14 @@ class Parser:
 
   def parse_type(self) -> ast.TypeRef:
     type_tok = self.match('IDENT')
-    return ast.TypeRef(name=type_tok.value, loc=self.loc(type_tok))
+    module = None
+    name = type_tok.value
+    if self.current().kind == 'DOT':
+      self.match('DOT')
+      name_tok = self.match('IDENT')
+      module = type_tok.value
+      name = name_tok.value
+    return ast.TypeRef(name=name, module=module, loc=self.loc(type_tok))
 
   def parse_block(self) -> ast.Block:
     lbrace_tok = self.match('LBRACE')
@@ -166,7 +204,7 @@ class Parser:
           f"Unclosed block, expected '}}' to match '{{' at {loc.line}:{loc.column}",
           self.loc(tok),
         )
-      if self.current().kind in ('FN', 'MODULE', 'ENUM', 'IMPORT'):
+      if self.current().kind in ('FN', 'MODULE', 'ENUM', 'IMPORT', 'EXPORT'):
         tok = self.current()
         raise ParseError("Missing '}' before top-level declaration", self.loc(tok))
       try:
@@ -349,12 +387,31 @@ class Parser:
       return ast.WildcardPattern(loc=self.loc(ident_tok))
     if tok.kind == 'IDENT':
       ident_tok = self.match('IDENT')
-      payload = None
+      if self.current().kind == 'DOT':
+        self.match('DOT')
+        variant_tok = self.match('IDENT')
+        payload = None
+        if self.current().kind == 'LPAREN':
+          lparen_tok = self.match('LPAREN')
+          payload = self.parse_pattern()
+          self.expect_closing('RPAREN', lparen_tok, "pattern payload", "(", ")")
+        return ast.EnumPattern(
+          module=ident_tok.value,
+          name=variant_tok.value,
+          payload=payload,
+          loc=self.loc(variant_tok),
+        )
       if self.current().kind == 'LPAREN':
         lparen_tok = self.match('LPAREN')
         payload = self.parse_pattern()
         self.expect_closing('RPAREN', lparen_tok, "pattern payload", "(", ")")
-      return ast.EnumPattern(name=ident_tok.value, payload=payload, loc=self.loc(ident_tok))
+        return ast.EnumPattern(
+          module=None,
+          name=ident_tok.value,
+          payload=payload,
+          loc=self.loc(ident_tok),
+        )
+      return ast.BindingPattern(name=ident_tok.value, loc=self.loc(ident_tok))
     raise ParseError(f"Unexpected pattern token {tok.kind} ('{tok.value}')", self.loc(tok))
 
   def parse_if_expr(self):
@@ -438,6 +495,17 @@ class Parser:
   def parse_postfix(self):
     expr = self.parse_primary()
     while True:
+      if self.current().kind == 'LPAREN':
+        lparen_tok = self.match('LPAREN')
+        args = []
+        if self.current().kind != 'RPAREN':
+          while True:
+            args.append(self.parse_expr())
+            if self.try_match('COMMA') is None:
+              break
+        self.expect_closing('RPAREN', lparen_tok, "call expression", "(", ")")
+        expr = ast.CallExpr(callee=expr, args=args, loc=self.loc(lparen_tok))
+        continue
       if self.current().kind == 'DOT':
         self.match('DOT')
         field_tok = self.match('IDENT')
@@ -475,16 +543,6 @@ class Parser:
     if tok.kind == 'IDENT':
       ident = tok.value
       ident_tok = self.match('IDENT')
-      if self.current().kind == 'LPAREN':
-        lparen_tok = self.match('LPAREN')
-        args = []
-        if self.current().kind != 'RPAREN':
-          while True:
-            args.append(self.parse_expr())
-            if self.try_match('COMMA') is None:
-              break
-        self.expect_closing('RPAREN', lparen_tok, "call expression", "(", ")")
-        return ast.CallExpr(callee=ident, args=args, loc=self.loc(ident_tok))
       return ast.VarRef(name=ident, loc=self.loc(ident_tok))
     if tok.kind == 'LPAREN':
       lparen_tok = self.match('LPAREN')

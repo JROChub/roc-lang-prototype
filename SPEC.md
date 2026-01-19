@@ -209,7 +209,8 @@ The included interpreter supports:
 
 - A single module per file (optional `module` header).
 - Enum definitions: `enum Color { Red, Green, Blue }`.
-- Import declarations: `import math_utils;`.
+- Import declarations: `import math_utils;` or `import math_utils as math;`.
+- Export declarations: `export { add, Color, Red };`.
 - Function definitions: `fn name(args) { ... }`
 - Function signatures and `let` bindings may include optional type annotations.
 - `let` bindings, `set` assignments, and `return` statements inside function bodies.
@@ -227,8 +228,8 @@ The included interpreter supports:
   - Parentheses
   - `if` expressions with `else`:
     `if cond { expr; } else { expr; }`
-  - `match` expressions with literal patterns and `_` wildcard:
-    `match expr { 1 => { expr; } _ => { expr; } }`
+  - `match` expressions with literal patterns, bindings, and `_` wildcard:
+    `match expr { 1 => { expr; } x => { x; } _ => { expr; } }`
 - Function calls with positional arguments.
 - Built-in `print` for console output (0 or more args).
 
@@ -239,11 +240,15 @@ Execution starts at `fn main()` with no arguments.
 ## 4. Informal grammar (subset)
 
 ```text
-program      ::= module_decl? import_decl* (enum_def | fn_def)*
+program      ::= module_decl? (import_decl | export_decl)* (enum_def | fn_def)*
 
 module_decl  ::= "module" IDENT
 
-import_decl  ::= "import" IDENT ";"
+import_decl  ::= "import" IDENT ("as" IDENT)? ";"
+
+export_decl  ::= "export" "{" export_list "}" ";"
+
+export_list  ::= IDENT ("," IDENT)*
 
 enum_def     ::= "enum" IDENT "{" enum_variants "}"
 
@@ -298,9 +303,12 @@ match_expr   ::= "match" expr "{" match_arm+ "}"
 
 match_arm    ::= pattern "=>" block ";"?
 
-pattern      ::= INT | STRING | TRUE | FALSE | "_" | enum_pattern
+pattern      ::= INT | STRING | TRUE | FALSE | "_" | binding_pattern | enum_pattern
+
+binding_pattern ::= IDENT
 
 enum_pattern ::= IDENT ("(" pattern ")")?
+             | IDENT "." IDENT ("(" pattern ")")?
 
 logical_or   ::= logical_and ("||" logical_and)*
 
@@ -318,7 +326,13 @@ unary        ::= "-" unary
                | "!" unary
                | postfix
 
-postfix      ::= primary (("." IDENT) | ("[" expr "]"))*
+postfix      ::= primary (call_suffix | field_suffix | index_suffix)*
+
+call_suffix  ::= "(" arg_list? ")"
+
+field_suffix ::= "." IDENT
+
+index_suffix ::= "[" expr "]"
 
 primary      ::= INT
                | STRING
@@ -327,7 +341,6 @@ primary      ::= INT
                | record_literal
                | list_literal
                | IDENT
-               | IDENT "(" arg_list? ")"
                | "(" expr ")"
 
 record_literal ::= "{" field_list? "}"
@@ -343,6 +356,7 @@ expr_list    ::= expr ("," expr)*
 arg_list     ::= expr ("," expr)*
 
 type_ref     ::= IDENT
+             | IDENT "." IDENT
 ```
 
 `else if` is accepted as sugar for `else { if ... }`.
@@ -354,7 +368,13 @@ type_ref     ::= IDENT
 - `main` is the entry point.
 - Each function call creates a new scope with its own variables.
 - Imports load sibling `.roc` files by name (e.g., `import math_utils;` loads `math_utils.roc`).
-- Imported definitions are added to the global scope; name collisions are errors.
+- `import name as alias;` binds the module namespace to `alias`; `import name;` binds it to `name`.
+- `export { ... };` lists the functions, enums, and enum variants that are visible to other modules.
+- Exporting an enum name does not export its variants; list variants explicitly to allow `module.Variant` access.
+- Module namespaces support qualified access to exported functions and enum variants (for example, `math.add(1, 2)` or `math.Some(1)`).
+- Unexported definitions are private to their module.
+- If no `export` declarations are present, the module exports nothing.
+- Unqualified names resolve only within the current module.
 - `let` defines a binding in the current scope (redefining in the same scope is an error).
 - `set` updates an existing binding in the nearest enclosing scope.
 - `return` exits the function with a value.
@@ -362,11 +382,15 @@ type_ref     ::= IDENT
 - `if` blocks evaluate in a child scope, so `let` bindings inside do not leak.
 - `match` expressions evaluate the first arm whose pattern matches the subject.
 - Match arms evaluate in child scopes like `if` blocks.
+- Identifier patterns bind a new variable unless they match a known enum variant.
 - Enum definitions introduce new types and variants.
 - Enum variants are values available in expressions and `match` patterns.
 - Enum variants may carry a single payload value.
 - Payload constructors use call syntax (e.g., `Some(1)`).
 - Payload patterns use `Variant(pattern)` (e.g., `Some(1)` or `Some(_)`).
+- Payload bindings use `Variant(name)` to bind (e.g., `Some(x)`).
+- Enum patterns may be qualified with a module alias (e.g., `math.Some(x)`).
+- Type annotations may refer to exported enums via module qualification (e.g., `colors.Color`).
 - Record literals evaluate to records with named fields.
 - Field access reads a record field; missing fields are a runtime error.
 - List literals evaluate to lists with ordered elements.

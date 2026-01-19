@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-- No changes yet.
+- Add import aliases with module-qualified access to functions and enum variants.
+- Allow call expressions on any expression (enables `module.func(...)`).
+- Add enum payload bindings in match patterns.
+- Scope imports to module namespaces (no global flattening of imported definitions).
+- Add explicit `export { ... };` declarations to control module visibility.
+- Exported enums no longer implicitly export their variants.
+- Allow module-qualified enum types in annotations (for example, `colors.Color`).
 
 ## 0.3.0
 

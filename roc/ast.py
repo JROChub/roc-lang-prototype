@@ -7,6 +7,7 @@ class Program:
   functions: List['FunctionDef']
   enums: List['EnumDef'] = field(default_factory=list)
   imports: List['ImportDecl'] = field(default_factory=list)
+  exports: List['ExportDecl'] = field(default_factory=list)
 
 @dataclass(frozen=True)
 class SourceLoc:
@@ -17,11 +18,18 @@ class SourceLoc:
 @dataclass
 class ImportDecl:
   name: str
+  alias: Optional[str] = None
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class ExportDecl:
+  names: List[str]
   loc: Optional[SourceLoc] = None
 
 @dataclass
 class TypeRef:
   name: str
+  module: Optional[str] = None
   loc: Optional[SourceLoc] = None
 
 @dataclass
@@ -133,7 +141,13 @@ class BoolPattern(Pattern):
 @dataclass
 class EnumPattern(Pattern):
   name: str
+  module: Optional[str] = None
   payload: Optional[Pattern] = None
+  loc: Optional[SourceLoc] = None
+
+@dataclass
+class BindingPattern(Pattern):
+  name: str
   loc: Optional[SourceLoc] = None
 
 @dataclass
@@ -218,6 +232,6 @@ class MatchExpr(Expr):
 
 @dataclass
 class CallExpr(Expr):
-  callee: str
+  callee: Expr
   args: List[Expr]
   loc: Optional[SourceLoc] = None

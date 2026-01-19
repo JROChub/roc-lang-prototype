@@ -19,10 +19,10 @@ def run_path(path: str, check_only: bool = False, all_errors: bool = False) -> i
     result = load_program(path)
     program = result.program
     sources = result.sources
-    check_program(program)
+    check_program(program, modules=result.modules, root_module=result.root_module)
     if check_only:
       return 0
-    interp = Interpreter(program)
+    interp = Interpreter(program, modules=result.modules, root_module=result.root_module)
     interp.execute()
     return 0
   except LoadError as e:

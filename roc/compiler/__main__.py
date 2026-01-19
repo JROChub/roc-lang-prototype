@@ -22,7 +22,7 @@ def main(argv=None):
     result = load_program(path)
     program = result.program
     sources = result.sources
-    check_program(program)
+    check_program(program, modules=result.modules, root_module=result.root_module)
     ir_mod = lower_program(program)
     print(ir_mod.pretty())
     return 0

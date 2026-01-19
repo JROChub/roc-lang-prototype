@@ -191,6 +191,20 @@ class InterpreterTests(unittest.TestCase):
     interp = build_interpreter(source)
     self.assertEqual(interp.execute(), 10)
 
+  def test_enum_payload_binding_pattern(self):
+    source = (
+      "enum Option { None, Some(Int) }"
+      "fn main() {"
+      "  let value = Some(7);"
+      "  return match value {"
+      "    Some(x) => { x; }"
+      "    _ => { 0; }"
+      "  };"
+      "}"
+    )
+    interp = build_interpreter(source)
+    self.assertEqual(interp.execute(), 7)
+
   def test_enum_payload_requires_value(self):
     source = (
       "enum Option { Some(Int) }"

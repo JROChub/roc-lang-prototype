@@ -65,6 +65,17 @@ class ParserTests(unittest.TestCase):
     self.assertEqual(len(program.imports), 1)
     self.assertEqual(program.imports[0].name, "util")
 
+  def test_import_alias_definition(self):
+    program = parse_program("import util as helpers; fn main() { return 1; }")
+    self.assertEqual(len(program.imports), 1)
+    self.assertEqual(program.imports[0].name, "util")
+    self.assertEqual(program.imports[0].alias, "helpers")
+
+  def test_export_definition(self):
+    program = parse_program("export { foo, Bar }; fn foo() { return 1; } enum Bar { Baz }")
+    self.assertEqual(len(program.exports), 1)
+    self.assertEqual(program.exports[0].names, ["foo", "Bar"])
+
   def test_enum_payload_variant(self):
     program = parse_program("enum Option { None, Some(Int) } fn main() { return 0; }")
     enum_def = program.enums[0]
@@ -80,12 +91,25 @@ class ParserTests(unittest.TestCase):
     stmt = program.functions[0].body.statements[0]
     self.assertIsInstance(stmt.expr, ast.MatchExpr)
 
+  def test_binding_pattern(self):
+    source = "fn main() { return match 1 { x => { x; } }; }"
+    program = parse_program(source)
+    stmt = program.functions[0].body.statements[0]
+    match_expr = stmt.expr
+    self.assertIsInstance(match_expr.arms[0].pattern, ast.BindingPattern)
+
   def test_type_annotations(self):
     program = parse_program("fn add(a: Int, b: Int) -> Int { return a + b; }")
     fn = program.functions[0]
     self.assertEqual(fn.params[0].type_ann.name, "Int")
     self.assertEqual(fn.params[1].type_ann.name, "Int")
     self.assertEqual(fn.return_type.name, "Int")
+
+  def test_module_qualified_type_annotation(self):
+    program = parse_program("fn main() { let x: colors.Color = colors.Red; }")
+    stmt = program.functions[0].body.statements[0]
+    self.assertEqual(stmt.type_ann.module, "colors")
+    self.assertEqual(stmt.type_ann.name, "Color")
 
   def test_let_type_annotation(self):
     program = parse_program("fn main() { let x: Int = 1; }")

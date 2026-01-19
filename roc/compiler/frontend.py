@@ -4,7 +4,8 @@ from .ir import IRModule, IRFunction, IREnum
 
 def lower_program(program: ast.Program) -> IRModule:
   mod = IRModule()
-  mod.imports = [imp.name for imp in program.imports]
+  mod.imports = [describe_import(imp) for imp in program.imports]
+  mod.exports = [exp.names for exp in program.exports]
   for enum_def in program.enums:
     mod.enums.append(lower_enum(enum_def))
   for fn in program.functions:
@@ -34,7 +35,14 @@ def describe_param(param: ast.Param) -> str:
   return f"{param.name}: {describe_type(param.type_ann)}"
 
 def describe_type(type_ref: ast.TypeRef) -> str:
+  if type_ref.module is not None:
+    return f"{type_ref.module}.{type_ref.name}"
   return type_ref.name
+
+def describe_import(imp: ast.ImportDecl) -> str:
+  if imp.alias:
+    return f"{imp.name} as {imp.alias}"
+  return imp.name
 
 def describe_stmt(stmt: ast.Stmt) -> str:
   if isinstance(stmt, ast.LetStmt):
@@ -98,7 +106,7 @@ def describe_expr(expr: ast.Expr) -> str:
     return f"match {describe_expr(expr.subject)} {{ {arms} }}"
   if isinstance(expr, ast.CallExpr):
     args = ', '.join(describe_expr(a) for a in expr.args)
-    return f"{expr.callee}({args})"
+    return f"{describe_expr(expr.callee)}({args})"
   return f"<unknown expr {expr.__class__.__name__}>"
 
 def describe_pattern(pattern: ast.Pattern) -> str:
@@ -111,7 +119,10 @@ def describe_pattern(pattern: ast.Pattern) -> str:
   if isinstance(pattern, ast.BoolPattern):
     return "true" if pattern.value else "false"
   if isinstance(pattern, ast.EnumPattern):
+    prefix = f"{pattern.module}." if pattern.module is not None else ""
     if pattern.payload is None:
-      return pattern.name
-    return f"{pattern.name}({describe_pattern(pattern.payload)})"
+      return f"{prefix}{pattern.name}"
+    return f"{prefix}{pattern.name}({describe_pattern(pattern.payload)})"
+  if isinstance(pattern, ast.BindingPattern):
+    return pattern.name
   return f"<unknown pattern {pattern.__class__.__name__}>"

@@ -59,6 +59,16 @@ class LexerTests(unittest.TestCase):
     kinds = [t.kind for t in tokens]
     self.assertIn('IMPORT', kinds)
 
+  def test_import_alias_tokens(self):
+    tokens = tokenize("import math_utils as math; fn main() { return 0; }")
+    kinds = [t.kind for t in tokens]
+    self.assertIn('AS', kinds)
+
+  def test_export_tokens(self):
+    tokens = tokenize("export { foo, Bar }; fn main() { return 0; }")
+    kinds = [t.kind for t in tokens]
+    self.assertIn('EXPORT', kinds)
+
 
 if __name__ == '__main__':
   unittest.main()

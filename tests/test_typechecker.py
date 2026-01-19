@@ -71,7 +71,7 @@ class TypeCheckerTests(unittest.TestCase):
       "enum Color { Red }"
       "fn main() {"
       "  return match Red {"
-      "    Blue => { 1; }"
+      "    Blue(1) => { 1; }"
       "    _ => { 0; }"
       "  };"
       "}"
@@ -79,6 +79,16 @@ class TypeCheckerTests(unittest.TestCase):
     with self.assertRaises(TypeError) as ctx:
       check_program(program)
     self.assertIn("Unknown enum variant", str(ctx.exception))
+
+  def test_match_binding_pattern(self):
+    program = parse_program(
+      "fn main() {"
+      "  return match 1 {"
+      "    x => { x + 1; }"
+      "  };"
+      "}"
+    )
+    check_program(program)
 
   def test_enum_payload_constructor(self):
     program = parse_program(

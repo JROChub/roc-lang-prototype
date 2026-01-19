@@ -23,6 +23,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    concurrency:
+      group: publish-${{ inputs.target }}
+      cancel-in-progress: false
     permissions:
       contents: read
       attestations: write
@@ -71,10 +75,7 @@ jobs:
         if: ${{ inputs.target == 'testpypi' && inputs.dry_run != 'true' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
       - name: Publish to PyPI
         if: ${{ inputs.target == 'pypi' && inputs.dry_run != 'true' }}
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}

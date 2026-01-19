@@ -6,9 +6,7 @@ We take security reports seriously, even for this prototype.
 
 Please do not open public issues for security concerns.
 
-Email: security@roc-lang.dev (preferred)
-
-If that address is not available, open a private GitHub Security Advisory:
+Please open a private GitHub Security Advisory:
 - Go to https://github.com/JROChub/roc-lang-prototype/security/advisories
 - Click "New draft security advisory"
 
@@ -22,4 +20,3 @@ If that address is not available, open a private GitHub Security Advisory:
 ## Supported versions
 
 This is a prototype. We will evaluate and patch critical issues in the latest `main` branch.
-

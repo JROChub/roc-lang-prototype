@@ -1,28 +1,28 @@
 import unittest
 
-import roc
+import greyalien
 
 
 class VersionTests(unittest.TestCase):
     def test_resolve_version_fallback(self):
-        original_version = roc.version
+        original_version = greyalien.version
         try:
 
             def _raise(_name: str) -> str:
-                raise roc.PackageNotFoundError
+                raise greyalien.PackageNotFoundError
 
-            roc.version = _raise
-            self.assertEqual(roc._resolve_version(), "0.0.0+local")
+            greyalien.version = _raise
+            self.assertEqual(greyalien._resolve_version(), "0.0.0+local")
         finally:
-            roc.version = original_version
+            greyalien.version = original_version
 
     def test_resolve_version_success(self):
-        original_version = roc.version
+        original_version = greyalien.version
         try:
-            roc.version = lambda _name: "1.2.3"
-            self.assertEqual(roc._resolve_version(), "1.2.3")
+            greyalien.version = lambda _name: "1.2.3"
+            self.assertEqual(greyalien._resolve_version(), "1.2.3")
         finally:
-            roc.version = original_version
+            greyalien.version = original_version
 
 
 if __name__ == "__main__":

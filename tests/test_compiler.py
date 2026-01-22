@@ -4,11 +4,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from roc.compiler import __main__ as compiler_main
-from roc.compiler import frontend
-from roc.compiler.ir import IRFunction, IREnum, IRModule
-from roc.lexer import tokenize
-from roc.parser import Parser
+from greyalien.compiler import __main__ as compiler_main
+from greyalien.compiler import frontend
+from greyalien.compiler.ir import IRFunction, IREnum, IRModule
+from greyalien.lexer import tokenize
+from greyalien.parser import Parser
 
 
 def parse_program(source: str):
@@ -28,7 +28,7 @@ class CompilerCliTests(unittest.TestCase):
     def test_compiler_uses_sys_argv(self):
         original = compiler_main.sys.argv
         try:
-            compiler_main.sys.argv = ["roc.compiler", "--help"]
+            compiler_main.sys.argv = ["greyalien.compiler", "--help"]
             buf = io.StringIO()
             with contextlib.redirect_stdout(buf):
                 code = compiler_main.main()
@@ -47,7 +47,7 @@ class CompilerCliTests(unittest.TestCase):
     def test_compiler_missing_file(self):
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            code = compiler_main.main(["missing.roc"])
+            code = compiler_main.main(["missing.grl"])
         self.assertEqual(code, 1)
         output = buf.getvalue()
         self.assertIn("Import error", output)
@@ -55,7 +55,7 @@ class CompilerCliTests(unittest.TestCase):
 
     def test_compiler_type_error(self):
         with tempfile.TemporaryDirectory() as tmpdir:
-            path = Path(tmpdir) / "main.roc"
+            path = Path(tmpdir) / "main.grl"
             path.write_text("fn main() { let x: Int = true; }\n", encoding="utf-8")
             buf = io.StringIO()
             with contextlib.redirect_stdout(buf):
@@ -65,7 +65,7 @@ class CompilerCliTests(unittest.TestCase):
 
     def test_compiler_success_ir(self):
         with tempfile.TemporaryDirectory() as tmpdir:
-            path = Path(tmpdir) / "main.roc"
+            path = Path(tmpdir) / "main.grl"
             path.write_text("fn main() { return 1; }\n", encoding="utf-8")
             buf = io.StringIO()
             with contextlib.redirect_stdout(buf):
@@ -74,8 +74,8 @@ class CompilerCliTests(unittest.TestCase):
         self.assertIn("fn main", buf.getvalue())
 
     def test_compiler_lookup_source_default(self):
-        source, path = compiler_main._lookup_source(None, "main.roc", {"main.roc": "fn main() {}"})
-        self.assertEqual(path, "main.roc")
+        source, path = compiler_main._lookup_source(None, "main.grl", {"main.grl": "fn main() {}"})
+        self.assertEqual(path, "main.grl")
         self.assertIn("fn main", source)
 
 

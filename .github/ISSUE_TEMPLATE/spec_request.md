@@ -26,7 +26,7 @@ What is explicitly in scope and out of scope?
 Provide a short outline of sections.
 
 ## Examples
-Include 1-3 examples (pseudo-code or Roc snippets).
+Include 1-3 examples (pseudo-code or Greyalien snippets).
 
 ## Open questions
 List open questions or undecided areas.

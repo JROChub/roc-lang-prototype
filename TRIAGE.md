@@ -5,7 +5,7 @@ with the vision and spec.
 
 ## Goals
 
-- Keep the backlog actionable and aligned with `ROC_VISION.md` and `SPEC.md`.
+- Keep the backlog actionable and aligned with `GREYALIEN_VISION.md` and `SPEC.md`.
 - Make clear entry points for contributors.
 - Keep implementation and docs in sync.
 

@@ -1,6 +1,6 @@
 import unittest
 
-from roc.lexer import LexError, tokenize
+from greyalien.lexer import LexError, tokenize
 
 
 class LexerTests(unittest.TestCase):

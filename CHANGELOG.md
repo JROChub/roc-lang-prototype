@@ -33,4 +33,4 @@
 ## 0.1.0
 
 - Initial publishable prototype with parser, interpreter, and type checker.
-- Unified CLI (`roc`) plus examples and specs.
+- Unified CLI (`greyalien`) plus examples and specs.

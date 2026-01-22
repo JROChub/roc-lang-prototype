@@ -1,6 +1,6 @@
-# Roc Vision
+# Greyalien Vision
 
-Roc is a next-generation systems language that targets the sweet spot between
+Greyalien is a next-generation systems language that targets the sweet spot between
 low-level control and high-level safety. The goal is a language that teams can
 trust for foundational infrastructure without sacrificing clarity or velocity.
 
@@ -10,7 +10,7 @@ trust for foundational infrastructure without sacrificing clarity or velocity.
 - Make effects, ownership, and concurrency visible and teachable.
 - Provide a joyful developer experience with uncompromising tooling.
 
-## What makes Roc different
+## What makes Greyalien different
 
 - Effects are explicit and part of the type system.
 - Ownership and borrowing are simplified with region-based reasoning.

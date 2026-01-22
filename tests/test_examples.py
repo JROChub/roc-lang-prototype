@@ -3,7 +3,7 @@ import io
 from pathlib import Path
 import unittest
 
-from roc import cli
+from greyalien import cli
 
 
 EXAMPLES_DIR = Path(__file__).resolve().parents[1] / "examples"
@@ -12,7 +12,7 @@ EXPECTED_DIR = EXAMPLES_DIR / "expected"
 
 class ExampleOutputTests(unittest.TestCase):
     def test_examples_match_expected_output(self):
-        example_paths = sorted(EXAMPLES_DIR.rglob("*.roc"))
+        example_paths = sorted(EXAMPLES_DIR.rglob("*.grl"))
         runnable = []
         for example_path in example_paths:
             relative = example_path.relative_to(EXAMPLES_DIR)

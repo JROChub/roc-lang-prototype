@@ -1,7 +1,7 @@
-# Roc Roadmap (Prototype)
+# Greyalien Roadmap (Prototype)
 
 This roadmap focuses on the Python interpreter subset and its supporting docs.
-For long-term direction, see `ROC_VISION.md`. For the conceptual language
+For long-term direction, see `GREYALIEN_VISION.md`. For the conceptual language
 design, see `SPEC.md`.
 
 ## Scope and versioning

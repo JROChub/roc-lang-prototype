@@ -13,10 +13,10 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
     if not argv:
-        print("Usage: python -m roc.compiler <file.roc>")
+        print("Usage: python -m greyalien.compiler <file.grl>")
         return 1
     if argv[0] in ("--help", "-h", "help"):
-        print("Usage: python -m roc.compiler <file.roc>")
+        print("Usage: python -m greyalien.compiler <file.grl>")
         return 0
     path = argv[0]
     try:

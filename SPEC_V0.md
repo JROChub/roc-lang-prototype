@@ -1,7 +1,7 @@
-# Roc v0 Core Spec (Interpreter Subset)
+# Greyalien v0 Core Spec (Interpreter Subset)
 
-This document specifies the exact Roc subset implemented by the Python
-interpreter in `roc/`. It is intentionally small and focused.
+This document specifies the exact Greyalien subset implemented by the Python
+interpreter in `greyalien/`. It is intentionally small and focused.
 
 ## 1. Syntax overview
 
@@ -164,7 +164,7 @@ type_ref     ::= IDENT
 
 - Execution begins at `fn main()`.
 - Each function call creates a new scope.
-- Imports load sibling `.roc` files by name (e.g., `import math_utils;` loads `math_utils.roc`).
+- Imports load sibling `.grl` files by name (e.g., `import math_utils;` loads `math_utils.grl`).
 - `import name as alias;` binds the module namespace to `alias`; `import name;` binds it to `name`.
 - `export { ... };` lists the functions, enums, and enum variants that are visible to other modules.
 - Exporting an enum name does not export its variants; list variants explicitly to allow `module.Variant` access.

@@ -1,6 +1,6 @@
-# Roc Compiler Architecture (Conceptual)
+# Greyalien Compiler Architecture (Conceptual)
 
-This document sketches a future native Roc compiler. The current codebase
+This document sketches a future native Greyalien compiler. The current codebase
 contains only a small interpreter, but the architecture here assumes a full
 compiler written in a systems language like Rust.
 
@@ -27,7 +27,7 @@ compiler written in a systems language like Rust.
    - Linking (executables, libraries)
 
 4. **Tooling**
-   - CLI (`roc`)
+   - CLI (`greyalien`)
    - Language Server Protocol (LSP)
    - Formatter, linter, package manager
 
@@ -116,12 +116,12 @@ compiler written in a systems language like Rust.
 
 ## 5. Tooling
 
-### 5.1. CLI (`roc`)
+### 5.1. CLI (`greyalien`)
 
-- `roc build main.roc`
-- `roc run main.roc`
-- `roc fmt` for formatting.
-- `roc check` for type-checking without building.
+- `greyalien build main.grl`
+- `greyalien run main.grl`
+- `greyalien fmt` for formatting.
+- `greyalien check` for type-checking without building.
 
 ### 5.2. Language Server
 
@@ -142,7 +142,7 @@ compiler written in a systems language like Rust.
 
 The current interpreter is a very small subset of the full vision:
 
-- It tokenizes and parses basic Roc syntax.
+- It tokenizes and parses basic Greyalien syntax.
 - It evaluates a simplified AST using a tree-walk interpreter.
 - It supports only integers, strings, functions, conditionals, and printing.
 

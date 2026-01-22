@@ -3,15 +3,15 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "roc-lang-prototype"
+name = "greyalien-prototype"
 version = "0.3.0"
-description = "Prototype interpreter and design docs for the Roc language."
+description = "Prototype interpreter and design docs for the Greyalien language."
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{name = "lexluger"}]
-keywords = ["language", "interpreter", "compiler", "roc"]
+keywords = ["language", "interpreter", "compiler", "greyalien"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3",
@@ -23,19 +23,19 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/JROChub/roc-lang-prototype"
-Repository = "https://github.com/JROChub/roc-lang-prototype"
-Issues = "https://github.com/JROChub/roc-lang-prototype/issues"
+Homepage = "https://github.com/JROChub/greyalien-prototype"
+Repository = "https://github.com/JROChub/greyalien-prototype"
+Issues = "https://github.com/JROChub/greyalien-prototype/issues"
 
 [project.scripts]
-roc = "roc.__main__:main"
+greyalien = "greyalien.__main__:main"
 
 [project.optional-dependencies]
 dev = ["coverage", "mypy", "ruff"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["roc*"]
+include = ["greyalien*"]
 exclude = ["tests*", "examples*"]
 
 [tool.ruff]
@@ -54,7 +54,7 @@ line-ending = "lf"
 
 [tool.mypy]
 python_version = "3.9"
-files = ["roc"]
+files = ["greyalien"]
 warn_unused_ignores = true
 warn_unused_configs = true
 no_implicit_optional = true
@@ -63,7 +63,7 @@ disable_error_code = ["annotation-unchecked"]
 
 [tool.coverage.run]
 branch = true
-source = ["roc"]
+source = ["greyalien"]
 
 [tool.coverage.report]
 show_missing = true

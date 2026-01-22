@@ -1,7 +1,7 @@
 module main
 
 fn main() {
-  print("=== Roc: The First Program ===");
+  print("=== Greyalien: The First Program ===");
 
   let a = 40;
   let b = 2;

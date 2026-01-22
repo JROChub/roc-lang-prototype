@@ -1,6 +1,6 @@
-# Roc Language v0 Specification (Conceptual)
+# Greyalien Language v0 Specification (Conceptual)
 
-Roc is a new, experimental systems language intended to be:
+Greyalien is a new, experimental systems language intended to be:
 
 - **Statically typed and compiled** (in its full form).
 - **Memory-safe by default**, with explicit `unsafe` for low-level work.
@@ -17,7 +17,7 @@ implements only a small, untyped subset.
 
 1. **Surpass C++ and Rust for new projects**:
 
-   - No undefined behavior in safe Roc.
+   - No undefined behavior in safe Greyalien.
    - Clear, modern module system.
    - Ownership and lifetimes made simpler via lexical regions.
 
@@ -37,13 +37,13 @@ system; it focuses on surface syntax and basic evaluation.
 
 ---
 
-## 2. Core language concepts (intended full Roc)
+## 2. Core language concepts (intended full Greyalien)
 
 ### 2.1. Modules
 
-Each `.roc` file starts with a module declaration:
+Each `.grl` file starts with a module declaration:
 
-```roc
+```grl
 module my.project.module
 ```
 
@@ -59,7 +59,7 @@ Module names are hierarchical and match directory structure.
 
 ### 2.3. Ownership and borrowing (draft)
 
-Roc uses a single-owner model to make memory safety explicit and teachable.
+Greyalien uses a single-owner model to make memory safety explicit and teachable.
 The goal is predictable rules with diagnostics that explain "why" and "how".
 
 #### 2.3.1. Core rules
@@ -98,7 +98,7 @@ The goal is predictable rules with diagnostics that explain "why" and "how".
 
 Move and use-after-move:
 
-```roc
+```grl
 fn main() {
   let data = make_buffer();
   let moved = data;
@@ -109,7 +109,7 @@ fn main() {
 
 Shared vs mutable borrow conflict:
 
-```roc
+```grl
 fn main() {
   let mut x = 1;
   let r1 = &x;
@@ -122,7 +122,7 @@ fn main() {
 
 Valid scoped mutable borrow:
 
-```roc
+```grl
 fn main() {
   let mut x = 1;
   {
@@ -141,14 +141,14 @@ fn main() {
 
 ### 2.5. Effects (draft)
 
-Effects make side effects explicit in type signatures. Roc aims for a small
+Effects make side effects explicit in type signatures. Greyalien aims for a small
 effect system that is easy to read and easy to teach.
 
 #### 2.5.1. Effect annotations
 
 Functions default to pure. Effectful functions declare a set of effects:
 
-```roc
+```grl
 fn read_file(path: String) -> Result<String, io::Error> effect [io]
 ```
 
@@ -173,7 +173,7 @@ fn read_file(path: String) -> Result<String, io::Error> effect [io]
 
 #### 2.5.5. Examples
 
-```roc
+```grl
 fn add(a: Int, b: Int) -> Int { a + b }
 
 fn read_name() -> String effect [io] {
@@ -188,7 +188,7 @@ fn main() -> Unit effect [io] {
 
 Calling an effectful function from a pure one is an error:
 
-```roc
+```grl
 fn pure() -> Int {
   let name = read_name(); // error: effect [io] not allowed here
   return 0;
@@ -203,7 +203,7 @@ fn pure() -> Int {
 
 ---
 
-## 3. Roc v0 interpreter subset
+## 3. Greyalien v0 interpreter subset
 
 The included interpreter supports:
 
@@ -367,7 +367,7 @@ type_ref     ::= IDENT
 
 - `main` is the entry point.
 - Each function call creates a new scope with its own variables.
-- Imports load sibling `.roc` files by name (e.g., `import math_utils;` loads `math_utils.roc`).
+- Imports load sibling `.grl` files by name (e.g., `import math_utils;` loads `math_utils.grl`).
 - `import name as alias;` binds the module namespace to `alias`; `import name;` binds it to `name`.
 - `export { ... };` lists the functions, enums, and enum variants that are visible to other modules.
 - Exporting an enum name does not export its variants; list variants explicitly to allow `module.Variant` access.

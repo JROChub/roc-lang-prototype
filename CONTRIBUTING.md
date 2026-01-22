@@ -1,6 +1,6 @@
-# Contributing to Roc (Prototype)
+# Contributing to Greyalien (Prototype)
 
-Thanks for helping with Roc. This repository is a prototype interpreter plus
+Thanks for helping with Greyalien. This repository is a prototype interpreter plus
 design docs, so changes should keep implementation and specs aligned.
 
 ## Quick start
@@ -39,7 +39,7 @@ make ci
 ## Doc changes
 
 - If you add or change syntax, update both `SPEC.md` and `SPEC_V0.md`.
-- Keep `ROC_CORE.md` and `ROC_VISION.md` aligned with the direction you intend.
+- Keep `GREYALIEN_CORE.md` and `GREYALIEN_VISION.md` aligned with the direction you intend.
 
 ## Reporting issues
 

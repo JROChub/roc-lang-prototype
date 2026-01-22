@@ -8,7 +8,7 @@ from .parser import Parser, ParseError
 from .interpreter import Interpreter, RuntimeError
 from .typechecker import check_program, TypeError
 
-HELP_TEXT = """Usage: python -m roc.cli [--all-errors] <file.roc>
+HELP_TEXT = """Usage: python -m greyalien.cli [--all-errors] <file.grl>
 
 Options:
   --all-errors  Show all parse errors instead of the first.

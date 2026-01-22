@@ -1,8 +1,8 @@
 import unittest
 
-from roc import ast
-from roc.lexer import tokenize
-from roc.parser import Parser, ParseError
+from greyalien import ast
+from greyalien.lexer import tokenize
+from greyalien.parser import Parser, ParseError
 
 
 def parse_program(source: str) -> ast.Program:

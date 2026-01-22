@@ -1,11 +1,11 @@
-# Roc Core Principles
+# Greyalien Core Principles
 
-Roc aims to be a systems language that is simultaneously safe, expressive, and
+Greyalien aims to be a systems language that is simultaneously safe, expressive, and
 pleasant to use. These are the non-negotiable principles that shape the design.
 
 ## 1. Safety by default
 
-- No undefined behavior in safe Roc.
+- No undefined behavior in safe Greyalien.
 - Explicit `unsafe` blocks for low-level escape hatches.
 - Memory safety and data-race freedom are enforced by the compiler.
 

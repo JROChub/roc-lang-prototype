@@ -1,19 +1,19 @@
-# Roc Language (Prototype)
+# Greyalien Language (Prototype)
 
-[![CI](https://github.com/JROChub/roc-lang-prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/JROChub/roc-lang-prototype/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/roc-lang-prototype.svg)](https://pypi.org/project/roc-lang-prototype/)
+[![CI](https://github.com/JROChub/greyalien-prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/JROChub/greyalien-prototype/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/greyalien-prototype.svg)](https://pypi.org/project/greyalien-prototype/)
 
-This is a **prototype implementation** of the Roc language concept:
+This is a **prototype implementation** of the Greyalien language concept:
 a new, experimental programming language designed to surpass traditional
 systems languages in clarity and safety.
 
 This ZIP includes:
 
-- `SPEC.md` – Roc v0 conceptual language design.
+- `SPEC.md` – Greyalien v0 conceptual language design.
 - `SPEC_V0.md` – the subset spec implemented by this interpreter.
-- `ROC_CORE.md` – core design principles.
-- `ROC_VISION.md` – long-term vision and roadmap.
-- `compiler_architecture.md` – high-level architecture for a future native Roc compiler.
+- `GREYALIEN_CORE.md` – core design principles.
+- `GREYALIEN_VISION.md` – long-term vision and roadmap.
+- `compiler_architecture.md` – high-level architecture for a future native Greyalien compiler.
 - `LICENSE` – MIT license.
 - `CONTRIBUTING.md` – contribution guide.
 - `CHANGELOG.md` – release notes.
@@ -21,10 +21,10 @@ This ZIP includes:
 - `ROADMAP.md` – v0.2 scope and priorities.
 - `TRIAGE.md` – issue triage guide.
 - `Makefile` – release helper targets.
-- `roc/` – a minimal Roc interpreter implemented in Python for a **small v0 subset**.
-- `examples/` – runnable `.roc` programs.
+- `greyalien/` – a minimal Greyalien interpreter implemented in Python for a **small v0 subset**.
+- `examples/` – runnable `.grl` programs.
 
-> Note: The interpreter is intentionally small. It runs a Roc *subset* with
+> Note: The interpreter is intentionally small. It runs a Greyalien *subset* with
 > functions, conditionals, loops, records, lists, match expressions, enums,
 > imports,
 > arithmetic, booleans, and printing. It is meant as a working playground,
@@ -54,21 +54,21 @@ This ZIP includes:
 ## Install from PyPI
 
 ```bash
-python -m pip install roc-lang-prototype
+python -m pip install greyalien-prototype
 ```
 
-Create a file `hello.roc`:
+Create a file `hello.grl`:
 
-```roc
+```grl
 fn main() {
-  print("Hello from Roc!");
+  print("Hello from Greyalien!");
 }
 ```
 
 Run it:
 
 ```bash
-roc run hello.roc
+greyalien run hello.grl
 ```
 
 ## Install from source
@@ -80,7 +80,7 @@ python -m pip install -e .
 Then run:
 
 ```bash
-roc run examples/hello.roc
+greyalien run examples/hello.grl
 ```
 
 ## Running examples
@@ -88,31 +88,31 @@ roc run examples/hello.roc
 From the directory where you unpack the ZIP:
 
 ```bash
-python -m roc.cli examples/hello.roc
+python -m greyalien.cli examples/hello.grl
 ```
 
 Or with the unified CLI:
 
 ```bash
-python -m roc run examples/hello.roc
+python -m greyalien run examples/hello.grl
 ```
 
 You should see:
 
 ```text
-Hello from Roc!
+Hello from Greyalien!
 ```
 
 Another example:
 
 ```bash
-python -m roc.cli examples/math.roc
+python -m greyalien.cli examples/math.grl
 ```
 
 Or:
 
 ```bash
-python -m roc run examples/math.roc
+python -m greyalien run examples/math.grl
 ```
 
 Expected output:
@@ -124,7 +124,7 @@ Result is 42
 Module example with qualified enum types:
 
 ```bash
-python -m roc run examples/modules/type_qual_demo.roc
+python -m greyalien run examples/modules/type_qual_demo.grl
 ```
 
 Expected output:
@@ -136,55 +136,55 @@ red
 Logic example:
 
 ```bash
-python -m roc.cli examples/logic.roc
+python -m greyalien.cli examples/logic.grl
 ```
 
 For-loop example:
 
 ```bash
-python -m roc.cli examples/for_demo.roc
+python -m greyalien.cli examples/for_demo.grl
 ```
 
 Typed example:
 
 ```bash
-python -m roc.cli examples/typed.roc
+python -m greyalien.cli examples/typed.grl
 ```
 
 Record example:
 
 ```bash
-python -m roc.cli examples/records.roc
+python -m greyalien.cli examples/records.grl
 ```
 
 List example:
 
 ```bash
-python -m roc.cli examples/list_demo.roc
+python -m greyalien.cli examples/list_demo.grl
 ```
 
 Match example:
 
 ```bash
-python -m roc.cli examples/match_demo.roc
+python -m greyalien.cli examples/match_demo.grl
 ```
 
 Enum example:
 
 ```bash
-python -m roc.cli examples/enum_demo.roc
+python -m greyalien.cli examples/enum_demo.grl
 ```
 
 Enum payload example:
 
 ```bash
-python -m roc.cli examples/enum_payload_demo.roc
+python -m greyalien.cli examples/enum_payload_demo.grl
 ```
 
 Module/import example:
 
 ```bash
-python -m roc.cli examples/modules/module_demo.roc
+python -m greyalien.cli examples/modules/module_demo.grl
 ```
 
 ## Running tests
@@ -201,40 +201,40 @@ python -m unittest discover -s tests
 ## Type checking only
 
 ```bash
-python -m roc check examples/typed.roc
+python -m greyalien check examples/typed.grl
 ```
 
 ## CLI quick reference
 
 ```text
-roc <file.roc>
-roc run <file.roc>
-roc check <file.roc>
-roc ir <file.roc>
-roc --all-errors <file.roc>
-roc run --all-errors <file.roc>
-roc check --all-errors <file.roc>
-roc --version
-roc --help
+greyalien <file.grl>
+greyalien run <file.grl>
+greyalien check <file.grl>
+greyalien ir <file.grl>
+greyalien --all-errors <file.grl>
+greyalien run --all-errors <file.grl>
+greyalien check --all-errors <file.grl>
+greyalien --version
+greyalien --help
 ```
 
 ## CLI help example
 
 ```bash
-roc --help
+greyalien --help
 ```
 
 ```text
 Usage:
-  roc <file.roc>
-  roc run <file.roc>
-  roc check <file.roc>
-  roc ir <file.roc>
-  roc --all-errors <file.roc>
-  roc run --all-errors <file.roc>
-  roc check --all-errors <file.roc>
-  roc --version
-  roc --help
+  greyalien <file.grl>
+  greyalien run <file.grl>
+  greyalien check <file.grl>
+  greyalien ir <file.grl>
+  greyalien --all-errors <file.grl>
+  greyalien run --all-errors <file.grl>
+  greyalien check --all-errors <file.grl>
+  greyalien --version
+  greyalien --help
 
 Options:
   --all-errors  Show all parse errors instead of the first.
@@ -245,20 +245,20 @@ Options:
 Use `--all-errors` to report every parse error in one run:
 
 ```bash
-roc check --all-errors examples/for_demo.roc
+greyalien check --all-errors examples/for_demo.grl
 ```
 
 ## Subset supported by the interpreter
 
 - Optional `module` declaration (ignored at runtime):
 
-  ```roc
+  ```grl
   module main
   ```
 
 - Function definitions:
 
-  ```roc
+  ```grl
   fn main() {
     print("Hello");
   }
@@ -270,7 +270,7 @@ roc check --all-errors examples/for_demo.roc
 
 - Optional type annotations (checked before execution):
 
-  ```roc
+  ```grl
   fn add(a: Int, b: Int) -> Int {
     return a + b;
   }
@@ -285,7 +285,7 @@ roc check --all-errors examples/for_demo.roc
 
 - `let` bindings inside functions:
 
-  ```roc
+  ```grl
   fn demo() {
     let x = 10;
     let y = x * 2;
@@ -295,7 +295,7 @@ roc check --all-errors examples/for_demo.roc
 
 - `set` assignments to update existing bindings:
 
-  ```roc
+  ```grl
   fn demo() {
     let count = 0;
     set count = count + 1;
@@ -304,7 +304,7 @@ roc check --all-errors examples/for_demo.roc
 
 - `while` loops:
 
-  ```roc
+  ```grl
   fn demo() {
     let i = 0;
     while i < 3 {
@@ -316,7 +316,7 @@ roc check --all-errors examples/for_demo.roc
 
 - `for` loops over integer ranges:
 
-  ```roc
+  ```grl
   fn demo() {
     for i in 0..10 by 2 {
       print(i);
@@ -329,7 +329,7 @@ roc check --all-errors examples/for_demo.roc
 
 - `break` and `continue` inside loops:
 
-  ```roc
+  ```grl
   fn demo() {
     for i in 0..10 {
       if i == 2 { continue; } else { print(i); };
@@ -338,7 +338,7 @@ roc check --all-errors examples/for_demo.roc
   }
   ```
 
-  ```roc
+  ```grl
   fn demo() {
     let i = 0;
     while true {
@@ -370,9 +370,9 @@ Types supported by the checker: `Int`, `Bool`, `String`, `Unit`.
 
 Anything else will result in a parse or runtime error.
 
-## Example Roc program
+## Example Greyalien program
 
-```roc
+```grl
 module main
 
 fn main() {
@@ -389,4 +389,4 @@ This runs on the interpreter and prints:
 Result is 42
 ```
 
-Enjoy experimenting with Roc!
+Enjoy experimenting with Greyalien!

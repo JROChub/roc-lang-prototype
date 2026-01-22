@@ -112,7 +112,7 @@ def load_program(path: str) -> LoadResult:
         loaded[file_path] = program
         base_dir = os.path.dirname(file_path)
         for imp in program.imports:
-            import_path = os.path.join(base_dir, f"{imp.name}.roc")
+            import_path = os.path.join(base_dir, f"{imp.name}.grl")
             if not os.path.exists(import_path):
                 raise LoadError(
                     kind="Import error",

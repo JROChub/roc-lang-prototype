@@ -1,5 +1,0 @@
-module main
-
-fn main() {
-  print("Hello from Roc!");
-}

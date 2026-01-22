@@ -7,7 +7,7 @@ We take security reports seriously, even for this prototype.
 Please do not open public issues for security concerns.
 
 Please open a private GitHub Security Advisory:
-- Go to https://github.com/JROChub/roc-lang-prototype/security/advisories
+- Go to https://github.com/JROChub/greyalien-prototype/security/advisories
 - Click "New draft security advisory"
 
 ## What to include

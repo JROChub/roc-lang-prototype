@@ -31,10 +31,10 @@ What you expected to happen.
 ## Actual behavior
 What actually happened.
 
-## Roc program
-Provide a minimal Roc snippet if applicable.
+## Greyalien program
+Provide a minimal Greyalien snippet if applicable.
 
-```roc
+```grl
 # paste code here
 ```
 

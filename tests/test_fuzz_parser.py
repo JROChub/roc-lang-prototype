@@ -1,8 +1,8 @@
 import random
 import unittest
 
-from roc.lexer import LexError, tokenize
-from roc.parser import Parser, ParseError
+from greyalien.lexer import LexError, tokenize
+from greyalien.parser import Parser, ParseError
 
 
 class ParserFuzzTests(unittest.TestCase):

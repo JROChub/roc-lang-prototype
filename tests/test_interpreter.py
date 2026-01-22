@@ -2,9 +2,9 @@ import contextlib
 import io
 import unittest
 
-from roc.lexer import tokenize
-from roc.parser import Parser
-from roc.interpreter import Interpreter, RuntimeError
+from greyalien.lexer import tokenize
+from greyalien.parser import Parser
+from greyalien.interpreter import Interpreter, RuntimeError
 
 
 def build_interpreter(source: str) -> Interpreter:

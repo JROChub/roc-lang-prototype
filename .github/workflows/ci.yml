@@ -100,9 +100,9 @@ jobs:
         run: python -m pip install dist/*.whl
       - name: Smoke test CLI
         run: |
-          roc --version
-          roc run examples/hello.roc | tee /tmp/roc_hello.out
-          grep -Fx "Hello from Roc!" /tmp/roc_hello.out
+          greyalien --version
+          greyalien run examples/hello.grl | tee /tmp/greyalien_hello.out
+          grep -Fx "Hello from Greyalien!" /tmp/greyalien_hello.out
 
   quality-gate:
     runs-on: ubuntu-latest

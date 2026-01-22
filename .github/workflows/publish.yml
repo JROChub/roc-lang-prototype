@@ -55,7 +55,7 @@ jobs:
           format: cyclonedx-json
           output-file: dist/sbom.cdx.json
       - name: Check package metadata
-        run: python -m twine check dist/*
+        run: python -m twine check dist/*.whl dist/*.tar.gz
       - name: Sign artifacts
         uses: sigstore/gh-action-sigstore-python@v3.1.0
         with:

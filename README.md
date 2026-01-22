@@ -1,7 +1,8 @@
 # Greyalien Language (Prototype)
 
 [![CI](https://github.com/JROChub/greyalien-prototype/actions/workflows/ci.yml/badge.svg)](https://github.com/JROChub/greyalien-prototype/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/greyalien-prototype.svg)](https://pypi.org/project/greyalien-prototype/)
+[![PyPI](https://img.shields.io/pypi/v/greyalien-prototype?label=PyPI&logo=pypi)](https://pypi.org/project/greyalien-prototype/)
+[![TestPyPI](https://img.shields.io/pypi/v/greyalien-prototype?label=TestPyPI&logo=pypi&registry_uri=https://test.pypi.org)](https://test.pypi.org/project/greyalien-prototype/)
 
 This is a **prototype implementation** of the Greyalien language concept:
 a new, experimental programming language designed to surpass traditional

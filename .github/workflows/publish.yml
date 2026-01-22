@@ -81,6 +81,8 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: publish-dist
+          skip-existing: true
+          verbose: true
       - name: Publish to PyPI
         if: ${{ inputs.target == 'pypi' && inputs.dry_run != 'true' }}
         uses: pypa/gh-action-pypi-publish@release/v1

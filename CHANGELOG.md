@@ -14,6 +14,13 @@
 - Add CodeQL scanning, Dependabot updates, SBOM generation, signed artifacts, and OIDC publishing.
 - Add a release workflow that tags, builds, signs, attests, and publishes.
 
+## 0.3.1
+
+- Rename the project and language to Greyalien (package, CLI, docs, specs, and examples).
+- Switch source file extension from `.roc` to `.grl`.
+- Update publishing workflow to sign, attest, and upload only wheel/sdist artifacts.
+- Add explicit PyPI and TestPyPI version badges in the README.
+
 ## 0.3.0
 
 - Add `match` expressions with literal patterns and `_` wildcard.

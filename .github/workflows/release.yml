@@ -113,7 +113,7 @@ jobs:
             dist/*.whl
             dist/*.tar.gz
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v3
         with:
           subject-path: dist/*
       - name: Upload build artifacts
